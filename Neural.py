@@ -9,13 +9,19 @@ import copy
 class Layer:
     def __init__(self, neurons):
         self.neurons = neurons
+        self.neural = None
 
     @property
     def data(self):
         return [neuron.data for neuron in self.neurons]
 
-    def mutate(self, neural):
-        random.choice(self.neurons).mutate(neural)
+    def mutate(self):
+        random.choice(self.neurons).mutate()
+
+    def sign(self, neural):
+        self.neural = neural
+        for neuron in self.neurons:
+            neuron.sign(self)
 
 
 class Neuron:
@@ -33,7 +39,11 @@ class Neuron:
         self.rand_range = rand_range
         self.evaluate = None
         self.random_number = None
+        self.layer = None
         self._get_parameters(function, rand_range, second_step, custom_second_step)
+
+    def sign(self, layer):
+        self.layer = layer
 
     def _get_parameters(self, function, rand_range, second_step, custom_second_step):
         if rand_range is not None:
@@ -49,22 +59,21 @@ class Neuron:
                 self.second_step = Neuron._get_second_step(second_step)
             else:
                 self.second_step = second_step
-            self.second_step_name = second_step.__name__
+            self.second_step_name = self.second_step.__name__
             self.evaluate = self._evaluate_with_second_step
         else:
             self.second_step_name = None
             self.evaluate = self._evaluate
         if self.bias is None and self.weight is None:
-            self.mutate = Neuron.try_mutate_another
+            self.mutate = self._try_mutate_another
             self.random_number = None
         elif self.bias is None:
             self.mutate = self._mutate_weight
         elif self.bias is not None and self.weight is not None:
             self.mutate = self._mutate_all
 
-    @staticmethod
-    def try_mutate_another(neuron):
-        neuron.mutate()
+    def _try_mutate_another(self):
+        self.layer.neural.mutate()
 
     @property
     def data(self):
@@ -72,10 +81,10 @@ class Neuron:
                 "second_step": self.second_step_name, "rand_range": self.rand_range,
                 "custom_function": self.custom_function, "custom_second_step": self.custom_second_step}
 
-    def _mutate_weight(self, neural):
+    def _mutate_weight(self):
         self.weight = self.random_number()
 
-    def _mutate_all(self, neural):
+    def _mutate_all(self):
         if random.choice([0, 1]) == 0:
             self.weight = self.random_number()
         else:
@@ -194,6 +203,11 @@ class Neural:
             raise Exception('name has not an appropriate type.')
         self.layers = layers
         self.inputs = inputs  # receives the number of inputs wanted
+        self.sign()
+
+    def sign(self):
+        for layer in self.layers:
+            layer.sign(self)
 
     @property
     def data(self):
@@ -239,10 +253,10 @@ class Neural:
                     neuron_output += neuron.evaluate(_input)
                 layer_output.append(neuron_output)
             inputs = layer_output
-        return layer_output
+        return inputs
 
     def mutate(self):
-        random.choice(self.layers).mutate(self)
+        random.choice(self.layers).mutate()
 
 
 def load_data(document, name=None, keep_name=False, directory='data'):
@@ -256,11 +270,8 @@ def load_data(document, name=None, keep_name=False, directory='data'):
     with open(document_address, 'r') as file:
         content = json.load(file)
         if name is not None:
-            content_layers = content[name]['layers']
-            layers = []
-            for n, layer in enumerate(content_layers):
-                layers.append(Layer([]))
-                _get_layer(n, layer, layers)
+            neural_layers = content[name]['layers']
+            layers = _get_layers(neural_layers)
             inputs = content[name]['inputs']
             if not keep_name:
                 name = None
@@ -273,32 +284,32 @@ def load_data(document, name=None, keep_name=False, directory='data'):
                 neural = content[neural_name]
                 neural_layers = neural['layers']
                 inputs = neural['inputs']
-                layers = []
-                for m, layer in enumerate(neural_layers):
-                    layers.append(Layer([]))
-                    _get_layer(m, layer, layers)
+                layers = _get_layers(neural_layers)
                 if not keep_name:
                     neural_name = None
                 saved_content.append(Neural(inputs, layers, neural_name))
             return saved_content
 
 
-def _get_layer(n, layer, layers):
-    for neuron in layer:
-        function = neuron['function']
-        weight = neuron['weight']
-        bias = neuron['bias']
-        second_step = neuron['second_step']
-        rand_range = neuron['rand_range']
-        custom_function = neuron['custom_function']
-        custom_second_step = neuron['custom_second_step']
-        layers[n].neurons.append(Neuron(function, weight, bias, second_step,
-                                        rand_range, custom_function, custom_second_step))
+def _get_layers(neural_layers):
+    layers = []
+    for n, layer in enumerate(neural_layers):
+        layers.append(Layer([]))
+        for neuron in layer:
+            function = neuron['function']
+            weight = neuron['weight']
+            bias = neuron['bias']
+            second_step = neuron['second_step']
+            rand_range = neuron['rand_range']
+            custom_function = neuron['custom_function']
+            custom_second_step = neuron['custom_second_step']
+            layers[n].neurons.append(Neuron(function, weight, bias, second_step,
+                                            rand_range, custom_function, custom_second_step))
+    return layers
 
 
 def random_homogeneous_neural(neurons_in_layer, neurons_function=None, neurons_second_step=None, weight=True,
-                              bias=False, rand_range=10, custom_function=False, custom_second_step=False,
-                              name=None):
+                              bias=False, rand_range=10, custom_function=False, custom_second_step=False, name=None):
     inputs = neurons_in_layer[0]
     layers = []
     for _layer in neurons_in_layer[1:]:
