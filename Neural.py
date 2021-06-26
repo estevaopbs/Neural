@@ -97,14 +97,15 @@ class Neuron:
         bias = random.uniform(-rand_range, rand_range) if has_bias else None
         return Neuron(function, weight, bias, second_step, rand_range, custom_function, custom_second_step)
 
-    def _check_parameters(self):
-        if self.function is Neuron.binary or self.function is Neuron.ReLU or self.function is Neuron.Leaky_ReLU:
-            if self.weight or self.bias is not None:
-                raise Exception(f'{self.function} do not use weight or bias. Keep it None.')
+    @staticmethod
+    def check_parameters(function, weight, bias):
+        if function is Neuron.binary or function is Neuron.ReLU or function is Neuron.Leaky_ReLU:
+            if weight or bias is not None:
+                raise NameError(f'{function.__name__} do not use weight or bias. Keep it None.')
             else:
                 return
-        if self.weight is None:
-            raise Exception(f'{self.function} needs a weight, but it was not included.')
+        if weight is None:
+            raise NameError(f'{function.__name__} needs a weight, but it was not included.')
         else:
             return
 
@@ -120,13 +121,16 @@ class Neuron:
         elif second_step == 'leaky relu':
             function = Neuron.Leaky_ReLU
             return function
-        raise Exception('Neuron\'s second step was not properly selected.')
+        raise NameError('Neuron\'s second step was not properly selected.')
 
     def _evaluate(self, _input):
-        return self.function(self, _input)
+        if self.weight is not None or self.bias is not None:
+            return self.function(self, _input)
+        else:
+            return self.function(_input)
 
     def _evaluate_with_second_step(self, _input):
-        return self.second_step(self, self.function(self, _input))
+        return self.second_step(self.function(self, _input))
 
     @staticmethod
     def linear(neuron, _input):
@@ -138,11 +142,11 @@ class Neuron:
 
     @staticmethod
     def sigmoid(neuron, _input):
-        return neuron.weight / (1 + math.e ** (- _input))
+        return 1 / (1 + math.e ** (- neuron.weight * _input))
 
     @staticmethod
     def biased_sigmoid(neuron, _input):
-        return neuron.weight / (1 + math.e ** (- _input)) + neuron.bias
+        return 1 / (1 + math.e ** (- neuron.weight * _input + neuron.bias))
 
     @staticmethod
     def binary(_input):
@@ -150,11 +154,11 @@ class Neuron:
 
     @staticmethod
     def tanh(neuron, _input):
-        return neuron.weight * ((2 / (1 + math.e ** (- 2 * _input))) - 1)
+        return neuron.weight * ((2 / (1 + math.e ** (- neuron.weight * 2 * _input))) - 1)
 
     @staticmethod
     def biased_tanh(neuron, _input):
-        return neuron.weight * ((2 / (1 + math.e ** (- 2 * _input))) - 1) + neuron.bias
+        return neuron.weight * ((2 / (1 + math.e ** (- neuron.weight * 2 * _input + neuron.bias))) - 1)
 
     @staticmethod
     def ReLU(_input):
@@ -187,7 +191,7 @@ class Neuron:
             self.function = Neuron.ReLU
         elif function == 'leaky relu':
             self.function = Neuron.Leaky_ReLU
-        self._check_parameters()
+        Neuron.check_parameters(self.function, self.weight, self.bias)
 
 
 class Neural:
@@ -200,7 +204,7 @@ class Neural:
         elif type(name) is str:
             self.name = name
         if name is not True and name is not False and name is not None and name is not True and type(name) is not str:
-            raise Exception('name has not an appropriate type.')
+            raise NameError('name has not an appropriate type.')
         self.layers = layers
         self.inputs = inputs  # receives the number of inputs wanted
         self.sign()
@@ -264,9 +268,9 @@ def load_data(document, name=None, keep_name=False, directory='data'):
     document_address = directory + document + '.json'
     if not os.path.exists(directory):
         os.mkdir(directory)
-        raise Exception(f"There's no '{document}' in '{directory}'.")
+        raise NameError(f"There's no '{document}' in '{directory}'.")
     if not os.path.isfile(document_address):
-        raise Exception(f"There's no '{document}' in the {directory}.")
+        raise NameError(f"There's no '{document}' in the {directory}.")
     with open(document_address, 'r') as file:
         content = json.load(file)
         if name is not None:
@@ -310,6 +314,8 @@ def _get_layers(neural_layers):
 
 def random_homogeneous_neural(neurons_in_layer, neurons_function=None, neurons_second_step=None, weight=True,
                               bias=False, rand_range=10, custom_function=False, custom_second_step=False, name=None):
+    if not custom_function:
+        Neuron.check_parameters(neurons_function, weight, bias)
     inputs = neurons_in_layer[0]
     layers = []
     for _layer in neurons_in_layer[1:]:
