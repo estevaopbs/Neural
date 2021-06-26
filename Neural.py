@@ -138,11 +138,11 @@ class Neuron:
 
     @staticmethod
     def sigmoid(neuron, _input):
-        return 1 / (1 + math.e ** (- neuron.weight * _input))
+        return neuron.weight / (1 + math.e ** (- _input))
 
     @staticmethod
     def biased_sigmoid(neuron, _input):
-        return 1 / (1 + math.e ** (- neuron.weight * _input)) + neuron.bias
+        return neuron.weight / (1 + math.e ** (- _input)) + neuron.bias
 
     @staticmethod
     def binary(_input):
@@ -150,11 +150,11 @@ class Neuron:
 
     @staticmethod
     def tanh(neuron, _input):
-        return (2 / (1 + math.e ** (- neuron.weight * 2 * _input))) - 1
+        return neuron.weight * ((2 / (1 + math.e ** (- 2 * _input))) - 1)
 
     @staticmethod
     def biased_tanh(neuron, _input):
-        return (2 / (1 + math.e ** (- neuron.weight * 2 * _input))) - 1 + neuron.bias
+        return neuron.weight * ((2 / (1 + math.e ** (- 2 * _input))) - 1) + neuron.bias
 
     @staticmethod
     def ReLU(_input):
