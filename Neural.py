@@ -7,26 +7,82 @@ from copy import deepcopy
 
 
 class Layer:
+    """Layer([...]) creates a layer of neurons by receiving a list of neurons."""
     def __init__(self, neurons):
         self.neurons = neurons
         self.neural = None
 
     @property
     def data(self):
+        """Returns all data that determine the layer as a list."""
         return [neuron.data for neuron in self.neurons]
 
     def mutate(self):
+        """Provokes a mutation in the layer changing one parameter (bias or weight) of a random neuron"""
         random.choice(self.neurons).mutate()
 
     def sign(self, neural):
+        """Receives the signature of the neural network, enabling it to be accessed from the layer. Also signs each
+        neuron of the layer as its own."""
         self.neural = neural
         for neuron in self.neurons:
             neuron.sign(self)
 
 
 class Neuron:
+
+    """The fundamental component of the neural network. The neurons are objects which has each one its own function,
+    weight, bias, random number generator and, possibly, a second step function."""
+
     def __init__(self, function, weight=None, bias=None, second_step=None,
                  rand_range=10, custom_function=False, custom_second_step=False):
+
+        """Initializes the instance by receiving a function, which is supposed to be a string correspondent to one of
+        the built-in functions that are 'linear', 'sigmoid', 'tanh', 'binary', 'relu', 'leaky relu' or the own function
+        if it is a custom function. It also receives a weight and/or bias if needed by the function.
+        The second_step variable receives a function that will be executed over the result of the main function before
+        the neuron give its output. This function is not supposed to have a weight or a bias, but I am not your dad. Do
+        whatever you want. It must receive a string correspondent to one of the built-in functions which does not accept
+        weight or bias. They are: 'binary', 'relu' (rectified linear unity) and 'leaky relu'. But if you want to use a
+        custom second step function, as the main function, it must receive the own function.
+        The rand_range variable receives the upper limit of the neuron's random number generator which will feed its
+        mutate function. The lower limit is the negative of the upper. It means that if some neuron's rand_range is
+        equal 10, when we call its mutate function, the next generated weight or bias will be in the range (-10, 10).
+        custom_function and custom_second_step are variables which receives boolean values True or False for enable or
+        disable, respectively, the use of a custom main function or second step function respectively.
+
+
+        The properties of a neuron are:
+        funtion -> Its main function.
+        function_name -> The string which name the main function.
+        weight -> Its multiplicative factor.
+        bias -> Its additive factor.
+        second_step -> Its second step function.
+        second_step_name -> The string which name the second step function.
+        custom_function -> Boolean value that enables (True) or disable (False) the use of a alternative function.
+        mutate -> Mutate method proper of the neuron that can be called by neuron.mutate() causing it to mutate.
+        rand_value -> The upper limit of the neuron's random number generator. The lower is its negative.
+        evaluate -> The method which the neuron receives a input and outputs its evaluation.
+        Can be called by neuron.evaluate(input).
+        self.random_number -> The method the neuron uses to generate random numbers.
+        Can be called by neuron.random_number().
+        layer -> The layer the neuron belongs.
+        data -> A dict with all the information needed to determine the neuron. Can be called by neuron.data().
+        random -> Provides new random weight and bias, if they are enabled, to the neuron.
+        Can be called by neuron.random().
+        check_parameters -> Check, for built-in functions, if weight or bias are acceptable, raising error when a neuron
+        is incoherent.
+
+
+        built-in functions explanation:
+        linear -> returns weight * input + bias
+        sigmoid -> returns 1 / (1 + e ^ - (weight * input + bias))
+        tanh -> returns tanh(weight * input + bias)
+        binary -> returns 1 if the input is greater or equal 0 else 0
+        relu -> returns maximum value between zero and the input
+        leaky relu -> returns (0.01 * input) if the input is less than zero else input
+        """
+
         self.function = None
         self.function_name = None
         self.weight = weight
@@ -43,6 +99,8 @@ class Neuron:
         self._get_parameters(function, rand_range, second_step, custom_second_step)
 
     def sign(self, layer):
+        """Receives the signature of the layer it belongs, enabling the neuron to access its layer and consequently the
+        network."""
         self.layer = layer
 
     def _get_parameters(self, function, rand_range, second_step, custom_second_step):
@@ -100,7 +158,7 @@ class Neuron:
 
     @staticmethod
     def check_parameters(function, weight, bias):
-        if function is Neuron.binary or function is Neuron.ReLU or function is Neuron.Leaky_ReLU:
+        if function is Neuron.binary or function is Neuron.relu or function is Neuron.leaky_relu:
             if weight or bias is not None:
                 raise NameError(f'{function.__name__} do not use weight or bias. Keep it None.')
             else:
@@ -112,15 +170,14 @@ class Neuron:
 
     @staticmethod
     def _get_second_step(second_step):
-        second_step = second_step.lower()
         if second_step == 'binary':
             function = Neuron.binary
             return function
         elif second_step == 'relu':
-            function = Neuron.ReLU
+            function = Neuron.relu
             return function
         elif second_step == 'leaky relu':
-            function = Neuron.Leaky_ReLU
+            function = Neuron.leaky_relu
             return function
         raise NameError('Neuron\'s second step was not properly selected.')
 
@@ -162,15 +219,14 @@ class Neuron:
         return neuron.weight * ((2 / (1 + e ** (- neuron.weight * 2 * _input + neuron.bias))) - 1)
 
     @staticmethod
-    def ReLU(_input):
+    def relu(_input):
         return max(0, _input)
 
     @staticmethod
-    def Leaky_ReLU(_input):
+    def leaky_relu(_input):
         return 0.01 * _input if _input < 0 else _input
 
     def _get_function(self, function):
-        function = function.lower()
         if function == 'linear':
             if self.bias is not None:
                 self.function = Neuron.biased_linear
@@ -189,25 +245,27 @@ class Neuron:
             else:
                 self.function = Neuron.tanh
         elif function == 'relu':
-            self.function = Neuron.ReLU
+            self.function = Neuron.relu
         elif function == 'leaky relu':
-            self.function = Neuron.Leaky_ReLU
+            self.function = Neuron.leaky_relu
         Neuron.check_parameters(self.function, self.weight, self.bias)
 
 
 class Neural:
     def __init__(self, inputs=None, layers=None, name=None):
         self.name = None
-        self.layers = layers  # receives the layers of the neural network
-        self.inputs = inputs  # receives the number of inputs wanted
-        self._get_name(name)  # Identifies the neural network with a name tag.
-        self.sign()  # Signs it's layers as its own.
+        self.layers = layers
+        self.inputs = inputs
+        self._get_name(name)
+        self.sign()
 
     def sign(self):
+        """Signs it's layers as its own."""
         for layer in self.layers:
             layer.sign(self)
 
     def _get_name(self, name):
+        """Identifies the neural network with a name tag."""
         if name is True:
             self.name = names.get_full_name()
         elif name is False or name is None:
@@ -223,7 +281,7 @@ class Neural:
 
     @property
     def hidden_neurons(self):
-        """Returns the number of neurons in each of the hidden layers in as a list."""
+        """Returns the number of neurons in each of the hidden layers as a list."""
         return [len(layer.neurons) for layer in self.layers[0:-1]]
 
     @property
@@ -271,7 +329,7 @@ class Neural:
         return inputs
 
     def mutate(self):
-        """provokes a mutation in the neural network changing one parameter (bias or weight) of a random neuron"""
+        """Provokes a mutation in the neural network changing one parameter (bias or weight) of a random neuron."""
         random.choice(self.layers).mutate()
 
 
