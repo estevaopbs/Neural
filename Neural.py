@@ -334,7 +334,7 @@ class Neural:
 
 
 def load_data(document, name=None, keep_name=False, directory='data'):
-    """Reads a '.json' document and returns the neural networks saved in it. It will search for a document named as the
+    """Reads a .json document and returns the neural networks saved in it. It will search for a document named as the
     first argument it received (must be a string) in the directory passed ('data' by default). If it were passed a name
     (string), it return only the neural network with such name, else, it will return a list with all the neural networks
     contained in the document."""
