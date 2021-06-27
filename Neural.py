@@ -1,9 +1,9 @@
 import names
 import random
 import os.path
-import math
+from math import e
 import json
-import copy
+from copy import deepcopy
 
 
 class Layer:
@@ -84,11 +84,12 @@ class Neuron:
     def _mutate_weight(self):
         self.weight = self.random_number()
 
+    def _mutate_bias(self):
+        self.bias = self.random_number()
+
     def _mutate_all(self):
-        if random.choice([0, 1]) == 0:
-            self.weight = self.random_number()
-        else:
-            self.bias = self.random_number()
+        random_parameter = random.choice([self._mutate_weight, self._mutate_bias])
+        random_parameter()
 
     @staticmethod
     def random(function=None, second_step=None, has_weight=False, has_bias=False,
@@ -142,11 +143,11 @@ class Neuron:
 
     @staticmethod
     def sigmoid(neuron, _input):
-        return 1 / (1 + math.e ** (- neuron.weight * _input))
+        return 1 / (1 + e ** (- neuron.weight * _input))
 
     @staticmethod
     def biased_sigmoid(neuron, _input):
-        return 1 / (1 + math.e ** (- neuron.weight * _input + neuron.bias))
+        return 1 / (1 + e ** (- neuron.weight * _input + neuron.bias))
 
     @staticmethod
     def binary(_input):
@@ -154,11 +155,11 @@ class Neuron:
 
     @staticmethod
     def tanh(neuron, _input):
-        return neuron.weight * ((2 / (1 + math.e ** (- neuron.weight * 2 * _input))) - 1)
+        return neuron.weight * ((2 / (1 + e ** (- neuron.weight * 2 * _input))) - 1)
 
     @staticmethod
     def biased_tanh(neuron, _input):
-        return neuron.weight * ((2 / (1 + math.e ** (- neuron.weight * 2 * _input + neuron.bias))) - 1)
+        return neuron.weight * ((2 / (1 + e ** (- neuron.weight * 2 * _input + neuron.bias))) - 1)
 
     @staticmethod
     def ReLU(_input):
@@ -197,35 +198,37 @@ class Neuron:
 class Neural:
     def __init__(self, inputs=None, layers=None, name=None):
         self.name = None
-        if name is True:  # identifies the neural network with a tag
-            self.name = names.get_full_name()
-        elif name is False or name is None:
-            self.name = str(self.__hash__())
-        elif type(name) is str:
-            self.name = name
-        if name is not True and name is not False and name is not None and name is not True and type(name) is not str:
-            raise NameError('name has not an appropriate type.')
-        self.layers = layers
+        self.layers = layers  # receives the layers of the neural network
         self.inputs = inputs  # receives the number of inputs wanted
+        self._get_name(name)
         self.sign()
 
-    def sign(self):
+    def sign(self):  # signs it's layers as its own
         for layer in self.layers:
             layer.sign(self)
 
-    @property
-    def data(self):
-        return {self.name: {"layers": [layer.data for layer in self.layers], "inputs": self.inputs}}
+    def _get_name(self, name):  # identifies the neural network with a name tag
+        if name is True:
+            self.name = names.get_full_name()
+        elif name is False or name is None:
+            self.name = str(self.__hash__())
+        if name is not True and name is not False and name is not None and name is not True and type(name) is not str:
+            raise NameError('name has not an appropriate type.')
+        return name
 
     @property
+    def data(self):  # returns all data that determine the neural network as a dict
+        return {self.name: {"layers": [layer.data for layer in self.layers], "inputs": self.inputs}}
+
+    @property  # returns the number of neurons in each of the hidden layers in as a list
     def hidden_neurons(self):
         return [len(layer.neurons) for layer in self.layers[0:-1]]
 
-    @property
+    @property  # returns the number of output neurons in the network
     def outputs(self):
         return len(self.layers[-1].neurons)
 
-    @property
+    @property  # returns the number of hidden layers in the network
     def hidden_layers(self):
         return len(self.layers) - 1
 
@@ -329,8 +332,8 @@ def random_homogeneous_neural(neurons_in_layer, neurons_function=None, neurons_s
 
 def crossover(parent, donor, name=False):
     donor_layer_index = random.choice(list(range(len(donor.layers))))
-    layers = copy.deepcopy(parent.layers)
-    layers[donor_layer_index] = copy.deepcopy(donor.layers[donor_layer_index])
+    layers = deepcopy(parent.layers)
+    layers[donor_layer_index] = deepcopy(donor.layers[donor_layer_index])
     if name:
         parent_family_name = parent.name.split(' ')[1:]
         donor_family_name = donor.name.split(' ')[1:]
