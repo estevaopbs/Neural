@@ -200,14 +200,14 @@ class Neural:
         self.name = None
         self.layers = layers  # receives the layers of the neural network
         self.inputs = inputs  # receives the number of inputs wanted
-        self._get_name(name)
-        self.sign()
+        self._get_name(name)  # Identifies the neural network with a name tag.
+        self.sign()  # Signs it's layers as its own.
 
-    def sign(self):  # signs it's layers as its own
+    def sign(self):
         for layer in self.layers:
             layer.sign(self)
 
-    def _get_name(self, name):  # identifies the neural network with a name tag
+    def _get_name(self, name):
         if name is True:
             self.name = names.get_full_name()
         elif name is False or name is None:
@@ -217,22 +217,29 @@ class Neural:
         return name
 
     @property
-    def data(self):  # returns all data that determine the neural network as a dict
+    def data(self):
+        """Returns all data that determine the neural network as a dict."""
         return {self.name: {"layers": [layer.data for layer in self.layers], "inputs": self.inputs}}
 
-    @property  # returns the number of neurons in each of the hidden layers in as a list
+    @property
     def hidden_neurons(self):
+        """Returns the number of neurons in each of the hidden layers in as a list."""
         return [len(layer.neurons) for layer in self.layers[0:-1]]
 
-    @property  # returns the number of output neurons in the network
+    @property
     def outputs(self):
+        """Returns the number of output neurons in the network."""
         return len(self.layers[-1].neurons)
 
-    @property  # returns the number of hidden layers in the network
+    @property
     def hidden_layers(self):
+        """Returns the number of hidden layers in the network."""
         return len(self.layers) - 1
 
     def write_data(self, document=None, directory='data'):
+        """Produces a .json document with the neuron's data. The document will be named as the first argument received
+        by the function (it must be a string), and it will be saved in the directory named by the second argument
+        received (also a string)."""
         directory = directory + '/'
         if document is None:
             file_name = self.name
@@ -252,6 +259,7 @@ class Neural:
                 json.dump(self.data, file, indent=6)
 
     def evaluate(self, inputs):
+        """Receives a iterable of numeric inputs and returns the neural network's evaluation."""
         for layer in self.layers:
             layer_output = []
             for neuron in layer.neurons:
@@ -263,10 +271,15 @@ class Neural:
         return inputs
 
     def mutate(self):
+        """provokes a mutation in the neural network changing one parameter (bias or weight) of a random neuron"""
         random.choice(self.layers).mutate()
 
 
 def load_data(document, name=None, keep_name=False, directory='data'):
+    """Reads a '.json' document and returns the neural networks saved in it. It will search for a document named as the
+    first argument it received (must be a string) in the directory passed ('data' by default). If it were passed a name
+    (string), it return only the neural network with such name, else, it will return a list with all the neural networks
+    contained in the document."""
     directory = directory + '/'
     document_address = directory + document + '.json'
     if not os.path.exists(directory):
