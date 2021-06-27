@@ -53,7 +53,7 @@ class Neuron:
 
 
         The properties of a neuron are:
-        funtion -> Its main function.
+        function -> Its main function.
         function_name -> The string which name the main function.
         weight -> Its multiplicative factor.
         bias -> Its additive factor.
