@@ -7,23 +7,50 @@ from copy import deepcopy
 
 
 class Layer:
-    """Layer([...]) creates a layer of neurons by receiving a list of neurons."""
+
+    """
+    Layer([...]) creates a layer of neurons by receiving a iterable of neurons.
+
+    The properties/methods of a layer are
+    neurons -> Its iterable of neurons (list, array, tuple, ...);
+    neural -> The neural network which the layer belongs;
+    data -> The list which contains all the data needed to determine the layer;
+    mutate -> The method by which the layer can suffer a mutation by choosing randomly one of its neurons and
+    calling its mutate method;
+    sign -> The method by which it is signed by a neural network as its own. It also signs its neurons as its own;
+    It is automatically called when a neural network with the related layer is created.
+    All these properties/methods can be seen by neuron.respective_property or neuron.respective_property() if its
+    callable.
+    Example of layer:
+    layer = Layer([Neuron(...), Neuron(...), Neuron(...), Neuron(...)])
+    """
+
     def __init__(self, neurons):
         self.neurons = neurons
         self.neural = None
 
     @property
     def data(self):
-        """Returns all data that determine the layer as a list."""
+
+        """
+        Returns all data that determine the layer as a list.
+        """
+
         return [neuron.data for neuron in self.neurons]
 
     def mutate(self):
-        """Provokes a mutation in the layer changing one parameter (bias or weight) of a random neuron"""
+
+        """
+        Provokes a mutation in the layer changing one parameter (bias or weight) of a random neuron
+        """
+
         random.choice(self.neurons).mutate()
 
     def sign(self, neural):
-        """Receives the signature of the neural network, enabling it to be accessed from the layer. Also signs each
-        neuron of the layer as its own."""
+        """
+        Receives the signature of the neural network, enabling it to be accessed from the layer. Also signs each
+        neuron of the layer as its own.
+        """
         self.neural = neural
         for neuron in self.neurons:
             neuron.sign(self)
@@ -31,58 +58,63 @@ class Layer:
 
 class Neuron:
 
-    """The fundamental component of the neural network. The neurons are objects which has each one its own function,
-    weight, bias, random number generator and, possibly, a second step function."""
+    """
+    The fundamental component of the neural network. The neurons are objects which has each one its own function,
+    weight, bias, random number generator and, possibly, a second step function.
+
+    It generates a neuron by receiving a function, which is supposed to be a string correspondent to one of the built-in
+    functions that are 'linear', 'sigmoid', 'tanh', 'binary', 'relu', 'leaky relu' or the own function if it is a custom
+    function. It also receives a weight and/or bias if needed for the function. The 'second_step' variable receives a
+    function that will be executed on the result of the main function before the neuron give its output. This function
+    is not supposed to have a weight or a bias. It must receive a string correspondent to one of the built-in functions
+    which does not accept weight or bias. They are: 'binary', 'relu' (rectified linear unity) and 'leaky relu'. But if
+    you want to use a custom second step function, as in the main function, it must receive the own function. The
+    'rand_range' variable receives the upper limit of the neuron's random number generator which will feed its mutate
+    function. The lower limit is the negative of the upper. It means that if some neuron has rand_range equal 10, when
+    we call its mutate function, the next generated weight or bias will be in the range (-10, 10). 'custom_function' and
+    'custom_second_step' are variables which receives boolean values 'True' or 'False' for enable or disable,
+    respectively, the use of a custom main function or custom second step function respectively.
+
+    The properties/methods of a neuron are
+    function -> Its main function;
+    function_name -> The string which name the main function;
+    weight -> Its multiplicative factor. When it's 'None', it will never be changed by a mutate call;
+    bias -> Its additive factor. When it's 'None', it will work as zero in the built-in functions, and it will never be
+    changed by a mutate call.
+    second_step -> Its second step function;
+    second_step_name -> The string which name the second step function;
+    custom_function -> Boolean value that enables (True) or disable (False) the use of a alternative function;
+    mutate -> Mutate method proper of the neuron that can be called by neuron.mutate() causing it to mutate;
+    rand_value -> The upper limit of the neuron's random number generator. The lower is its negative. It's 10 by
+    default;
+    evaluate -> The method which the neuron receives a input and outputs its evaluation;
+    self.random_number -> The method the neuron uses to generate random numbers;
+    layer -> The layer which the neuron belongs;
+    data -> A dictionary with all the information needed to determine the neuron;
+    random -> Provides new random weight and bias, if they are enabled, to the neuron;
+    check_parameters -> Check, for built-in functions, if weight or bias are acceptable, raising error when a neuron
+    is incoherent. It is automatically called when the neuron is created;
+    sign ->  Method by which it is signed by a layer as its own. It is automatically called when a layer with the
+    related neuron is created.
+
+    All these properties/methods can be seen by neuron.respective_property or neuron.respective_property() if its
+    callable.
+
+    Built-in functions' explanation:
+    linear -> returns weight * input + bias;
+    sigmoid -> returns 1 / (1 + e ^ - (weight * input + bias));
+    tanh -> returns tanh(weight * input + bias);
+    binary -> returns 1 if the input is greater or equal 0 otherwise returns 0;
+    relu -> returns maximum value between zero and the input;
+    leaky relu -> returns (0.01 * input) if the input is less than zero otherwise returns the input.
+
+    Example of neuron:
+    neuron = Neuron(function='linear', weight=1, bias=None, second_step='binary',
+                        rand_range=100, custom_function=False, custom_second_step=False)
+    """
 
     def __init__(self, function, weight=None, bias=None, second_step=None,
                  rand_range=10, custom_function=False, custom_second_step=False):
-
-        """Initializes the instance by receiving a function, which is supposed to be a string correspondent to one of
-        the built-in functions that are 'linear', 'sigmoid', 'tanh', 'binary', 'relu', 'leaky relu' or the own function
-        if it is a custom function. It also receives a weight and/or bias if needed by the function.
-        The second_step variable receives a function that will be executed over the result of the main function before
-        the neuron give its output. This function is not supposed to have a weight or a bias, but I am not your dad. Do
-        whatever you want. It must receive a string correspondent to one of the built-in functions which does not accept
-        weight or bias. They are: 'binary', 'relu' (rectified linear unity) and 'leaky relu'. But if you want to use a
-        custom second step function, as the main function, it must receive the own function.
-        The rand_range variable receives the upper limit of the neuron's random number generator which will feed its
-        mutate function. The lower limit is the negative of the upper. It means that if some neuron's rand_range is
-        equal 10, when we call its mutate function, the next generated weight or bias will be in the range (-10, 10).
-        custom_function and custom_second_step are variables which receives boolean values True or False for enable or
-        disable, respectively, the use of a custom main function or second step function respectively.
-
-
-        The properties of a neuron are:
-        function -> Its main function.
-        function_name -> The string which name the main function.
-        weight -> Its multiplicative factor.
-        bias -> Its additive factor.
-        second_step -> Its second step function.
-        second_step_name -> The string which name the second step function.
-        custom_function -> Boolean value that enables (True) or disable (False) the use of a alternative function.
-        mutate -> Mutate method proper of the neuron that can be called by neuron.mutate() causing it to mutate.
-        rand_value -> The upper limit of the neuron's random number generator. The lower is its negative.
-        evaluate -> The method which the neuron receives a input and outputs its evaluation.
-        Can be called by neuron.evaluate(input).
-        self.random_number -> The method the neuron uses to generate random numbers.
-        Can be called by neuron.random_number().
-        layer -> The layer the neuron belongs.
-        data -> A dict with all the information needed to determine the neuron. Can be called by neuron.data().
-        random -> Provides new random weight and bias, if they are enabled, to the neuron.
-        Can be called by neuron.random().
-        check_parameters -> Check, for built-in functions, if weight or bias are acceptable, raising error when a neuron
-        is incoherent.
-
-
-        built-in functions explanation:
-        linear -> returns weight * input + bias
-        sigmoid -> returns 1 / (1 + e ^ - (weight * input + bias))
-        tanh -> returns tanh(weight * input + bias)
-        binary -> returns 1 if the input is greater or equal 0 else 0
-        relu -> returns maximum value between zero and the input
-        leaky relu -> returns (0.01 * input) if the input is less than zero else input
-        """
-
         self.function = None
         self.function_name = None
         self.weight = weight
@@ -99,8 +131,12 @@ class Neuron:
         self._get_parameters(function, rand_range, second_step, custom_second_step)
 
     def sign(self, layer):
-        """Receives the signature of the layer it belongs, enabling the neuron to access its layer and consequently the
-        network."""
+
+        """
+        Receives the signature of the layer it belongs, enabling the neuron to access its layer and consequently the
+        network.
+        """
+
         self.layer = layer
 
     def _get_parameters(self, function, rand_range, second_step, custom_second_step):
@@ -252,6 +288,38 @@ class Neuron:
 
 
 class Neural:
+
+    """
+    The object which contains layers of neurons by which it can passes an argument to evaluate it.
+
+    Produces a neural network by receiving the number of inputs waited (must be an integer value), a iterable of layers
+    and a boolean value, 'None' or a string for 'name' variable. The layers it receive in the 'layers' variable exclude
+    the input layer, because this one is substituted by the integer value 'inputs' that means the number of input
+    neurons it is supposed to have. If name receives 'True', the neural network will be identified by a random human
+    name, if it receives 'False', will be identified by its __hash__ number, if it receives a string it will be
+    identified by the string itself.
+
+    The properties/methods of a neural network are
+    name -> The tag that identifies it;
+    layers -> Its iterable of layers (list, array, tuple, ...), but without the input neurons;
+    inputs -> Its number of waited inputs, it means, the number of input neurons;
+    sign -> The method by which the neural network assigns its layers as its own;
+    data -> A dictionary with all the information needed to determine the neural network;
+    hidden_neurons -> A list with the number of neurons in each of the hidden layers;
+    outputs -> The number of output neurons in the network;
+    hidden_layers -> The number of hidden layers in the network;
+    write_data -> The method by which neuron's data can be saved in a .json document;
+    evaluate -> The method by which the network receives a iterable of inputs and returns its evaluation.;
+    mutate -> The method by which the neural network mutate by choosing a random layer and calling its mutate
+    function.
+
+    All these properties/methods can be seen by neuron.respective_property or neuron.respective_property() if its
+    callable.
+
+    Example of neural network:
+    neural_network = Neural(5, [Layer([...]), Layer([...]), Layer([...]), name='John')
+    """
+
     def __init__(self, inputs=None, layers=None, name=None):
         self.name = None
         self.layers = layers
@@ -260,12 +328,20 @@ class Neural:
         self.sign()
 
     def sign(self):
-        """Signs it's layers as its own."""
+
+        """
+        Signs it's layers as its own.
+        """
+
         for layer in self.layers:
             layer.sign(self)
 
     def _get_name(self, name):
-        """Identifies the neural network with a name tag."""
+
+        """
+        Identifies the neural network with a name tag.
+        """
+
         if name is True:
             self.name = names.get_full_name()
         elif name is False or name is None:
@@ -276,28 +352,50 @@ class Neural:
 
     @property
     def data(self):
-        """Returns all data that determine the neural network as a dict."""
+
+        """
+        Returns all data that determine the neural network as a dictionary.
+        """
+
         return {self.name: {"layers": [layer.data for layer in self.layers], "inputs": self.inputs}}
 
     @property
     def hidden_neurons(self):
-        """Returns the number of neurons in each of the hidden layers as a list."""
+
+        """
+        Returns the number of neurons in each of the hidden layers as a list.
+        """
+
         return [len(layer.neurons) for layer in self.layers[0:-1]]
 
     @property
     def outputs(self):
-        """Returns the number of output neurons in the network."""
+
+        """
+        Returns the number of output neurons in the network.
+        """
+
         return len(self.layers[-1].neurons)
 
     @property
     def hidden_layers(self):
-        """Returns the number of hidden layers in the network."""
+
+        """
+        Returns the number of hidden layers in the network.
+        """
+
         return len(self.layers) - 1
 
     def write_data(self, document=None, directory='data'):
-        """Produces a .json document with the neuron's data. The document will be named as the first argument received
-        by the function (it must be a string), and it will be saved in the directory named by the second argument
-        received (also a string)."""
+
+        """
+        Produces a .json document with the neuron's data. The document will be named as the 'document' argument received
+        by the function (it must be a string), and it will be saved in the directory named by the 'directory' argument
+        received (also a string) that is 'data' by default. If the folder name by directory does not existed it will be
+        crated. If the document already exists, the information will be appended, otherwise, the document will be
+        created.
+        """
+
         directory = directory + '/'
         if document is None:
             file_name = self.name
@@ -317,7 +415,11 @@ class Neural:
                 json.dump(self.data, file, indent=6)
 
     def evaluate(self, inputs):
-        """Receives a iterable of numeric inputs and returns the neural network's evaluation."""
+
+        """
+        Receives a iterable of numeric inputs and returns the neural network's evaluation.
+        """
+
         for layer in self.layers:
             layer_output = []
             for neuron in layer.neurons:
@@ -329,15 +431,23 @@ class Neural:
         return inputs
 
     def mutate(self):
-        """Provokes a mutation in the neural network changing one parameter (bias or weight) of a random neuron."""
+
+        """
+        Provokes a mutation in the neural network changing one parameter (bias or weight) of a random neuron.
+        """
+
         random.choice(self.layers).mutate()
 
 
 def load_data(document, name=None, keep_name=False, directory='data'):
-    """Reads a .json document and returns the neural networks saved in it. It will search for a document named as the
-    first argument it received (must be a string) in the directory passed ('data' by default). If it were passed a name
-    (string), it return only the neural network with such name, else, it will return a list with all the neural networks
-    contained in the document."""
+
+    """
+    Reads a .json document and returns the neural networks saved in it. It will search for a document named as the
+    'document' argument it received (must be a string) in the directory passed ('data' by default). If it is passed a
+    name (string), it return only the neural network with such name, otherwise, it will return a list with all the
+    neural networks contained in the document.
+    """
+
     directory = directory + '/'
     document_address = directory + document + '.json'
     if not os.path.exists(directory):
@@ -388,6 +498,30 @@ def _get_layers(neural_layers):
 
 def random_homogeneous_neural(neurons_in_layer, neurons_function=None, neurons_second_step=None, weight=True,
                               bias=False, rand_range=10, custom_function=False, custom_second_step=False, name=None):
+
+    """
+    Returns a neural networks in which all neurons have identical parameters, but weight and bias (if they are allowed)
+    will be randomly generated for each individual neuron.
+
+    It receives a iterable of integer numbers describing the number of neurons in each layer, like '[3, 4, 4, 5]', which
+    mean it would have three input neurons in the input layer, four hidden neurons in the first hidden layer, four
+    neurons in the second hidden layer and five neurons in the output layer. The input layer only means how many inputs
+    the network waits, it doesn't do any evaluation on it. The 'neurons_function' variable must receive a string related
+    to one of the built-in functions of the Neuron class, or the function itself if the custom function is enabled. The
+    'weight' and 'bias' variables must receive 'True' or 'False' to enable or disable each one. By default 'weight' is
+    defined as 'True' and bias as 'False'. The 'rand_range' variable determines the range where weight and bias will be
+    generated and to where it will can be mutated. It represents the upper limit, and the lower limit the negative of
+    the upper. The 'custom_function' and 'custom_second_step' variables enables or disable the use of custom functions
+    in the neurons. Set it 'True' to use custom functions, 'False' to built-in ones. By default they are set as 'False',
+    it behaviours the same way as if it is 'None'. When it is 'True' it makes the generated network has a random human
+    name as name, and when it is a string it makes the generated neural network has the related string as a name.
+
+    Example of use:
+    random_network = random_homogeneous_neural(neurons_in_layer=[5, 6, 7, 5], neurons_function='sigmoid',
+                                               neurons_second_step=None, weight=True, bias=True, rand_range=10,
+                                               custom_function=False, custom_second_step=False, name=True)
+    """
+
     if not custom_function:
         Neuron.check_parameters(neurons_function, weight, bias)
     inputs = neurons_in_layer[0]
@@ -402,10 +536,20 @@ def random_homogeneous_neural(neurons_in_layer, neurons_function=None, neurons_s
 
 
 def crossover(parent, donor, name=False):
+
+    """
+    Returns a new neural network by receiving two other networks, one in the 'parent' variable, other in 'donor'
+    variable. The network generated will be  identical the parent but with one of its layers substituted by a copy of
+    one layer randomly selected of the donor. If the 'name' variable is set 'False' or 'None', the neural network
+    generated will has its '__hash__' as name. If name is set 'True' and the parent and donor have human names the
+    network generated will inherit the parent's and donor's families names, and will also have a random first name. If
+    the 'name' variable be a string the generated network will receive this string as name.
+    """
+
     donor_layer_index = random.choice(list(range(len(donor.layers))))
     layers = deepcopy(parent.layers)
     layers[donor_layer_index] = deepcopy(donor.layers[donor_layer_index])
-    if name:
+    if name and not parent.name.isnumeric and not donor.name.isnumeric and type(name) is not str:
         parent_family_name = parent.name.split(' ')[1:]
         donor_family_name = donor.name.split(' ')[1:]
         child_family_name = []
