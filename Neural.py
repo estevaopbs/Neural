@@ -287,7 +287,7 @@ class Neuron:
         Neuron.check_parameters(self.function, self.weight, self.bias)
 
 
-class Neural:
+class Network:
 
     """
     The object which contains layers of neurons by which it can passes an argument to evaluate it.
@@ -317,7 +317,7 @@ class Neural:
     callable.
 
     Example of neural network:
-    neural_network = Neural(5, [Layer([...]), Layer([...]), Layer([...]), name='John')
+    neural_network = Network(5, [Layer([...]), Layer([...]), Layer([...]), name='John')
     """
 
     def __init__(self, inputs=None, layers=None, name=None):
@@ -463,7 +463,7 @@ def load_data(document, name=None, keep_name=False, directory='data'):
             inputs = content[name]['inputs']
             if not keep_name:
                 name = None
-            return Neural(inputs, layers, name)
+            return Network(inputs, layers, name)
         else:
             neural_names = list(content.keys())
             saved_content = []
@@ -475,7 +475,7 @@ def load_data(document, name=None, keep_name=False, directory='data'):
                 layers = _get_layers(neural_layers)
                 if not keep_name:
                     neural_name = None
-                saved_content.append(Neural(inputs, layers, neural_name))
+                saved_content.append(Network(inputs, layers, neural_name))
             return saved_content
 
 
@@ -532,7 +532,7 @@ def random_homogeneous_neural(neurons_in_layer, neurons_function=None, neurons_s
             layer.append(Neuron.random(neurons_function, neurons_second_step, weight, bias, rand_range,
                                        custom_function, custom_second_step))
         layers.append(Layer(layer))
-    return Neural(inputs, layers, name)
+    return Network(inputs, layers, name)
 
 
 def crossover(parent, donor, name=False):
@@ -559,4 +559,4 @@ def crossover(parent, donor, name=False):
             child_family_name.append(family_name)
         child_family_name += parent_family_name
         name = names.get_first_name() + ' ' + ' '.join(child_family_name)
-    return Neural(parent.inputs, layers, name)
+    return Network(parent.inputs, layers, name)
