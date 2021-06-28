@@ -19,8 +19,10 @@ class Layer:
     calling its mutate method;
     sign -> The method by which it is signed by a neural network as its own. It also signs its neurons as its own;
     It is automatically called when a neural network with the related layer is created.
+
     All these properties/methods can be seen by neuron.respective_property or neuron.respective_property() if its
     callable.
+
     Example of layer:
     layer = Layer([Neuron(...), Neuron(...), Neuron(...), Neuron(...)])
     """
