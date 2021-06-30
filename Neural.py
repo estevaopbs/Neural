@@ -490,8 +490,8 @@ def _get_layers(neural_layers):
     return layers
 
 
-def random_homogeneous_neural(neurons_in_layer, neurons_function=None, neurons_second_step=None, weight=True,
-                              bias=False, rand_range=10, custom_function=False, custom_second_step=False, name=None):
+def random_homogeneous_network(neurons_in_layer, neurons_function=None, neurons_second_step=None, weight=True,
+                               bias=False, rand_range=10, custom_function=False, custom_second_step=False, name=None):
     """
     Returns a neural networks in which all neurons have identical parameters, but weight and bias (if they are allowed)
     will be randomly generated for each individual neuron.
