@@ -194,7 +194,13 @@ class Neuron:
         must be 'True'. By default it is 'False'. By default, 'function' and 'second_step' must receive a string related
         to one of the built-in functions (to know more, print Neuron.__doc__) and to enable it to receive custom
         functions, 'custom_function' and/or 'custom_second_step' must receive 'True' ('False' by default) depending on
-        which one you want to enable.
+        which one you want to enable. The range of the bias and weight generated which will also be passed to the neuron
+        to feed its mutate function will have its upper limit given by the 'rand_range' variable value and the lower
+        limit by its negative.
+
+        Example of call:
+        neuron = Neuron.random(function='linear', second_step='binary', has_weight=True, has_bias=True, rand_range=100,
+                               custom_function=False, custom_second_step=False)
         """
         weight = random.uniform(-rand_range, rand_range) if has_weight else None
         bias = random.uniform(-rand_range, rand_range) if has_bias else None
