@@ -353,7 +353,7 @@ class Network:
         """
         if name is True:
             self.name = names.get_full_name()
-        elif name is False or name is None:
+        elif name is None:
             self.name = str(self.__hash__())
         elif type(name) is str:
             self.name = name
