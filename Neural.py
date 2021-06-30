@@ -222,14 +222,13 @@ class Neuron:
     def _get_second_step(second_step):
         if second_step == 'binary':
             function = Neuron.binary
-            return function
         elif second_step == 'relu':
             function = Neuron.relu
-            return function
         elif second_step == 'leaky relu':
             function = Neuron.leaky_relu
-            return function
-        raise NameError('Neuron\'s second step was not properly selected.')
+        else:
+            raise NameError('Neuron\'s second step was not properly selected.')
+        return function
 
     def _evaluate(self, _input):
         if self.weight is not None or self.bias is not None:
@@ -356,9 +355,11 @@ class Network:
             self.name = names.get_full_name()
         elif name is False or name is None:
             self.name = str(self.__hash__())
-        if name is not True and name is not False and name is not None and name is not True and type(name) is not str:
+        elif type(name) is str:
+            self.name = name
+        else:
             raise NameError('name has not an appropriate type.')
-        return name
+        return
 
     @property
     def data(self):
@@ -539,9 +540,10 @@ def crossover(parent, donor, name=False):
     donor_layer_index = random.choice(list(range(len(donor.layers))))
     layers = deepcopy(parent.layers)
     layers[donor_layer_index] = deepcopy(donor.layers[donor_layer_index])
-    if name and not parent.name.isnumeric and not donor.name.isnumeric and type(name) is not str:
-        parent_family_name = parent.name.split(' ')[1:]
-        donor_family_name = donor.name.split(' ')[1:]
+    parent_family_name = parent.name.split(' ')[1:]
+    donor_family_name = donor.name.split(' ')[1:]
+    if name and not parent.name.isnumeric() and not donor.name.isnumeric() and type(name) is not str and \
+            len(parent_family_name) > 0 and len(donor_family_name) > 0:
         child_family_name = []
         for family_name in donor_family_name:
             if family_name in parent_family_name:
@@ -549,4 +551,6 @@ def crossover(parent, donor, name=False):
             child_family_name.append(family_name)
         child_family_name += parent_family_name
         name = names.get_first_name() + ' ' + ' '.join(child_family_name)
-    return Network(parent.inputs, layers, name)
+    elif name:
+        raise NameError('Donor\'s and parent\'s names are not compatible.')
+    return Network(parent.inputs, layers, name=name)
