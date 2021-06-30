@@ -7,7 +7,6 @@ from copy import deepcopy
 
 
 class Layer:
-
     """
     Layer([...]) creates a layer of neurons by receiving a iterable of neurons.
 
@@ -33,19 +32,15 @@ class Layer:
 
     @property
     def data(self):
-
         """
         Returns all data that determine the layer as a list.
         """
-
         return [neuron.data for neuron in self.neurons]
 
     def mutate(self):
-
         """
         Provokes a mutation in the layer changing one parameter (bias or weight) of a random neuron
         """
-
         random.choice(self.neurons).mutate()
 
     def sign(self, neural):
@@ -93,7 +88,8 @@ class Neuron:
     self.random_number -> The method the neuron uses to generate random numbers;
     layer -> The layer which the neuron belongs;
     data -> A dictionary with all the information needed to determine the neuron;
-    random -> Provides new random weight and bias, if they are enabled, to the neuron;
+    random -> Static method which returns a neuron with random weight and bias by receiving a main function and possibly
+    a second step function;
     check_parameters -> Check, for built-in functions, if weight or bias are acceptable, raising error when a neuron
     is incoherent. It is automatically called when the neuron is created;
     sign ->  Method by which it is signed by a layer as its own. It is automatically called when a layer with the
@@ -133,12 +129,10 @@ class Neuron:
         self._get_parameters(function, rand_range, second_step, custom_second_step)
 
     def sign(self, layer):
-
         """
         Receives the signature of the layer it belongs, enabling the neuron to access its layer and consequently the
         network.
         """
-
         self.layer = layer
 
     def _get_parameters(self, function, rand_range, second_step, custom_second_step):
@@ -173,6 +167,9 @@ class Neuron:
 
     @property
     def data(self):
+        """
+        Returns all data that determine the neuron as a dictionary.
+        """
         return {"function": self.function_name, "weight": self.weight, "bias": self.bias,
                 "second_step": self.second_step_name, "rand_range": self.rand_range,
                 "custom_function": self.custom_function, "custom_second_step": self.custom_second_step}
@@ -190,6 +187,15 @@ class Neuron:
     @staticmethod
     def random(function=None, second_step=None, has_weight=False, has_bias=False,
                rand_range=10, custom_function=False, custom_second_step=False):
+        """
+        Returns a neuron with random parameters (weight and/or bias) by receiving a function (custom or not), possibly a
+        second step (custom or not). To enable the use of a weight the 'has_weight' variable must be 'True', otherwise
+        it will be disabled since that by default it is 'False'. Similarly, to enable the use of a bias, the 'has_bias'
+        must be 'True'. By default it is 'False'. By default, 'function' and 'second_step' must receive a string related
+        to one of the built-in functions (to know more, print Neuron.__doc__) and to enable it to receive custom
+        functions, 'custom_function' and/or 'custom_second_step' must receive 'True' ('False' by default) depending on
+        which one you want to enable.
+        """
         weight = random.uniform(-rand_range, rand_range) if has_weight else None
         bias = random.uniform(-rand_range, rand_range) if has_bias else None
         return Neuron(function, weight, bias, second_step, rand_range, custom_function, custom_second_step)
@@ -330,20 +336,16 @@ class Network:
         self.sign()
 
     def sign(self):
-
         """
         Signs it's layers as its own.
         """
-
         for layer in self.layers:
             layer.sign(self)
 
     def _get_name(self, name):
-
         """
         Identifies the neural network with a name tag.
         """
-
         if name is True:
             self.name = names.get_full_name()
         elif name is False or name is None:
@@ -354,42 +356,33 @@ class Network:
 
     @property
     def data(self):
-
         """
         Returns all data that determine the neural network as a dictionary.
         """
-
         return {self.name: {"layers": [layer.data for layer in self.layers], "inputs": self.inputs}}
 
     @property
     def hidden_neurons(self):
-
         """
         Returns the number of neurons in each of the hidden layers as a list.
         """
-
         return [len(layer.neurons) for layer in self.layers[0:-1]]
 
     @property
     def outputs(self):
-
         """
         Returns the number of output neurons in the network.
         """
-
         return len(self.layers[-1].neurons)
 
     @property
     def hidden_layers(self):
-
         """
         Returns the number of hidden layers in the network.
         """
-
         return len(self.layers) - 1
 
     def write_data(self, document=None, directory='data'):
-
         """
         Produces a .json document with the neuron's data. The document will be named as the 'document' argument received
         by the function (it must be a string), and it will be saved in the directory named by the 'directory' argument
@@ -397,7 +390,6 @@ class Network:
         crated. If the document already exists, the information will be appended, otherwise, the document will be
         created.
         """
-
         directory = directory + '/'
         if document is None:
             file_name = self.name
@@ -417,11 +409,9 @@ class Network:
                 json.dump(self.data, file, indent=6)
 
     def evaluate(self, inputs):
-
         """
         Receives a iterable of numeric inputs and returns the neural network's evaluation.
         """
-
         for layer in self.layers:
             layer_output = []
             for neuron in layer.neurons:
@@ -433,23 +423,19 @@ class Network:
         return inputs
 
     def mutate(self):
-
         """
         Provokes a mutation in the neural network changing one parameter (bias or weight) of a random neuron.
         """
-
         random.choice(self.layers).mutate()
 
 
 def load_data(document, name=None, keep_name=False, directory='data'):
-
     """
     Reads a .json document and returns the neural networks saved in it. It will search for a document named as the
     'document' argument it received (must be a string) in the directory passed ('data' by default). If it is passed a
     name (string), it return only the neural network with such name, otherwise, it will return a list with all the
     neural networks contained in the document.
     """
-
     directory = directory + '/'
     document_address = directory + document + '.json'
     if not os.path.exists(directory):
@@ -500,7 +486,6 @@ def _get_layers(neural_layers):
 
 def random_homogeneous_neural(neurons_in_layer, neurons_function=None, neurons_second_step=None, weight=True,
                               bias=False, rand_range=10, custom_function=False, custom_second_step=False, name=None):
-
     """
     Returns a neural networks in which all neurons have identical parameters, but weight and bias (if they are allowed)
     will be randomly generated for each individual neuron.
@@ -523,7 +508,6 @@ def random_homogeneous_neural(neurons_in_layer, neurons_function=None, neurons_s
                                                neurons_second_step=None, weight=True, bias=True, rand_range=10,
                                                custom_function=False, custom_second_step=False, name=True)
     """
-
     if not custom_function:
         Neuron.check_parameters(neurons_function, weight, bias)
     inputs = neurons_in_layer[0]
@@ -538,7 +522,6 @@ def random_homogeneous_neural(neurons_in_layer, neurons_function=None, neurons_s
 
 
 def crossover(parent, donor, name=False):
-
     """
     Returns a new neural network by receiving two other networks, one in the 'parent' variable, other in 'donor'
     variable. The network generated will be  identical the parent but with one of its layers substituted by a copy of
@@ -547,7 +530,6 @@ def crossover(parent, donor, name=False):
     network generated will inherit the parent's and donor's families names, and will also have a random first name. If
     the 'name' variable be a string the generated network will receive this string as name.
     """
-
     donor_layer_index = random.choice(list(range(len(donor.layers))))
     layers = deepcopy(parent.layers)
     layers[donor_layer_index] = deepcopy(donor.layers[donor_layer_index])
