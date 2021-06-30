@@ -534,7 +534,7 @@ def crossover(parent, donor, name=False):
     one layer randomly selected of the donor. If the 'name' variable is set 'False' or 'None', the neural network
     generated will has its '__hash__' as name. If name is set 'True' and the parent and donor have human names the
     network generated will inherit the parent's and donor's families names, and will also have a random first name. If
-    the 'name' variable be a string the generated network will receive this string as name.
+    the 'name' variable is a string the generated network will receive this string as name.
     """
     donor_layer_index = random.choice(list(range(len(donor.layers))))
     layers = deepcopy(parent.layers)
