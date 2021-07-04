@@ -142,12 +142,16 @@ class Neuron:
             self.function_name = function
             self._get_function(function)
         else:
+            if type(function) is str:
+                function = eval(function)
             self.function_name = function.__name__
             self.function = function
         if second_step is not None:
             if not custom_second_step:
                 self.second_step = Neuron._get_second_step(second_step)
             else:
+                if type(second_step) is str:
+                    second_step = eval(second_step)
                 self.second_step = second_step
             self.second_step_name = self.second_step.__name__
             self.evaluate = self._evaluate_with_second_step
@@ -353,7 +357,7 @@ class Network:
         """
         if name is True:
             self.name = names.get_full_name()
-        elif name is None:
+        elif name is False or name is None:
             self.name = str(self.__hash__())
         elif type(name) is str:
             self.name = name
