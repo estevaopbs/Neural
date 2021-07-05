@@ -54,7 +54,6 @@ class Layer:
 
 
 class Neuron:
-
     """
     The fundamental component of the neural network. The neurons are objects which has each one its own function,
     weight, bias, random number generator and, possibly, a second step function.
@@ -305,7 +304,6 @@ class Neuron:
 
 
 class Network:
-
     """
     The object which contains layers of neurons by which it can passes an argument to evaluate it.
 
