@@ -1,3 +1,4 @@
+import copy
 import names
 import random
 import os.path
@@ -110,22 +111,25 @@ class Neuron:
                         rand_range=100, custom_function=False, custom_second_step=False)
     """
 
-    def __init__(self, function, weight=None, bias=None, second_step=None,
-                 rand_range=10, custom_function=False, custom_second_step=False):
+    def __init__(self, function, weights=None, bias=None, second_step=None, rand_weights_range=10,
+                 rand_bias_range=None, custom_function=False, custom_second_step=False):
         self.function = None
         self.function_name = None
-        self.weight = weight
+        self.weights = weights
         self.bias = bias
         self.second_step = None
         self.second_step_name = None
         self.custom_function = custom_function
         self.custom_second_step = custom_second_step
         self.mutate = None
-        self.rand_range = rand_range
+        self.rand_weights_range = rand_weights_range
+        self.rand_bias_range = rand_bias_range
         self.evaluate = None
-        self.random_number = None
+        self.rand_weight = None
+        self.rand_bias = None
         self.layer = None
-        self._get_parameters(function, rand_range, second_step, custom_second_step)
+        self.input_neuron = False
+        self._get_parameters(function, second_step)
 
     def sign(self, layer):
         """
@@ -133,10 +137,34 @@ class Neuron:
         network.
         """
         self.layer = layer
+        if self.weights is True:
+            layer_index = self.layer.neural.layers.index(self.layer)
+            if layer_index == 0:
+                self.weights = self.rand_weight()
+            else:
+                self.weights = [self.rand_weight() for _ in range(len(self.layer.neural.layers[layer_index - 1].neurons))]
+        if self.bias is None and self.weights is None:
+            self.mutate = self._try_mutate_another
+        elif self.bias is None and not hasattr(self.weights, '__iter__'):
+            self.mutate = self._mutate_weight
+        elif self.bias is None and (hasattr(self.weights, '__iter__')):
+            self.mutate = self._mutate_weights
+        elif self.bias is not None and self.weights is not None and not hasattr(self.weights, '__iter__'):
+            self.mutate = self._mutate_weight_and_bias
+        elif self.bias is not None and self.weights is not None and hasattr(self.weights, '__iter__'):
+            self.mutate = self._mutate_weights_and_bias
 
-    def _get_parameters(self, function, rand_range, second_step, custom_second_step):
-        if rand_range is not None:
-            self.random_number = lambda: random.uniform(-rand_range, rand_range)
+    def _get_parameters(self, function, second_step):
+        if self.bias is not None and self.bias is not True and self.bias is not int and self.bias is not float:
+            raise NameError('Bias\' type is not appropriate.')
+        if self.bias is not None and self.rand_bias_range is None:
+            raise NameError('Bias needs a int or float value to \'rand_bias_range\' variable to work.')
+        if self.rand_weights_range is not None:
+            self.rand_weight = lambda: random.uniform(-self.rand_weights_range, self.rand_weights_range)
+        if self.rand_bias_range is not None:
+            self.rand_bias = lambda: random.uniform(-self.rand_bias_range, self.rand_bias_range)
+            if self.bias is True:
+                self.bias = self.rand_bias()
         if not self.custom_function:
             self.function_name = function
             self._get_function(function)
@@ -146,24 +174,23 @@ class Neuron:
             self.function_name = function.__name__
             self.function = function
         if second_step is not None:
-            if not custom_second_step:
+            if not self.custom_second_step:
                 self.second_step = Neuron._get_second_step(second_step)
             else:
                 if type(second_step) is str:
                     second_step = eval(second_step)
                 self.second_step = second_step
             self.second_step_name = self.second_step.__name__
-            self.evaluate = self._evaluate_with_second_step
+            if self.bias is None:
+                self.evaluate = self._evaluate_with_second_step
+            else:
+                self.evaluate = self._evaluate_with_bias_with_second_step
         else:
             self.second_step_name = None
-            self.evaluate = self._evaluate
-        if self.bias is None and self.weight is None:
-            self.mutate = self._try_mutate_another
-            self.random_number = None
-        elif self.bias is None:
-            self.mutate = self._mutate_weight
-        elif self.bias is not None and self.weight is not None:
-            self.mutate = self._mutate_all
+            if self.bias is None:
+                self.evaluate = self._evaluate
+            else:
+                self.evaluate = self._evaluate_with_bias
 
     def _try_mutate_another(self):
         self.layer.neural.mutate()
@@ -173,53 +200,27 @@ class Neuron:
         """
         Returns all data that determine the neuron as a dictionary.
         """
-        return {"function": self.function_name, "weight": self.weight, "bias": self.bias,
-                "second_step": self.second_step_name, "rand_range": self.rand_range,
-                "custom_function": self.custom_function, "custom_second_step": self.custom_second_step}
+        return {"function": self.function_name, "weights": self.weights, "bias": self.bias,
+                "second_step": self.second_step_name, "rand_weights_range": self.rand_weights_range,
+                "rand_bias_range": self.rand_bias_range, "custom_function": self.custom_function,
+                "custom_second_step": self.custom_second_step}
+
+    def _mutate_weights(self):
+        self.weights[random.choice(range(len(self.weights)))] = self.rand_weight()
 
     def _mutate_weight(self):
-        self.weight = self.random_number()
+        self.weight = self.rand_weight()
 
     def _mutate_bias(self):
-        self.bias = self.random_number()
+        self.bias = self.rand_bias()
 
-    def _mutate_all(self):
-        random_parameter = random.choice([self._mutate_weight, self._mutate_bias])
-        random_parameter()
+    def _mutate_weight_and_bias(self):
+        self._mutate_weight()
+        self._mutate_bias()
 
-    @staticmethod
-    def random(function=None, second_step=None, has_weight=False, has_bias=False,
-               rand_range=10, custom_function=False, custom_second_step=False):
-        """
-        Returns a neuron with random parameters (weight and/or bias) by receiving a function (custom or not), possibly a
-        second step (custom or not). To enable the use of a weight the 'has_weight' variable must be 'True', otherwise
-        it will be disabled since that by default it is 'False'. Similarly, to enable the use of a bias, the 'has_bias'
-        must be 'True'. By default it is 'False'. By default, 'function' and 'second_step' must receive a string related
-        to one of the built-in functions (to know more, print Neuron.__doc__) and to enable it to receive custom
-        functions, 'custom_function' and/or 'custom_second_step' must receive 'True' ('False' by default) depending on
-        which one you want to enable. The range of the bias and weight generated which will also be passed to the neuron
-        to feed its mutate function will have its upper limit given by the 'rand_range' variable value and the lower
-        limit by its negative.
-
-        Example of call:
-        neuron = Neuron.random(function='linear', second_step='binary', has_weight=True, has_bias=True, rand_range=100,
-                               custom_function=False, custom_second_step=False)
-        """
-        weight = random.uniform(-rand_range, rand_range) if has_weight else None
-        bias = random.uniform(-rand_range, rand_range) if has_bias else None
-        return Neuron(function, weight, bias, second_step, rand_range, custom_function, custom_second_step)
-
-    @staticmethod
-    def check_parameters(function, weight, bias):
-        if function is Neuron.binary or function is Neuron.relu or function is Neuron.leaky_relu:
-            if weight or bias is not None:
-                raise NameError(f'{function.__name__} do not use weight or bias. Keep it None.')
-            else:
-                return
-        if weight is None:
-            raise NameError(f'{function.__name__} needs a weight, but it was not included.')
-        else:
-            return
+    def _mutate_weights_and_bias(self):
+        self._mutate_weights()
+        self._mutate_bias()
 
     @staticmethod
     def _get_second_step(second_step):
@@ -234,41 +235,32 @@ class Neuron:
         return function
 
     def _evaluate(self, _input):
-        if self.weight is not None or self.bias is not None:
-            return self.function(self, _input)
-        else:
-            return self.function(_input)
+        return self.function(_input)
+
+    def _evaluate_with_bias(self, _input):
+        return self.function(_input + self.bias)
+
+    def _evaluate_with_bias_with_second_step(self, _input):
+        self.second_step(self.function(_input + self.bias))
 
     def _evaluate_with_second_step(self, _input):
-        return self.second_step(self.function(self, _input))
+        return self.second_step(self.function(_input))
 
     @staticmethod
-    def linear(neuron, _input):
-        return _input * neuron.weight
+    def linear(_input):
+        return _input
 
     @staticmethod
-    def biased_linear(neuron, _input):
-        return _input * neuron.weight + neuron.bias
-
-    @staticmethod
-    def sigmoid(neuron, _input):
-        return 1 / (1 + e ** (- neuron.weight * _input))
-
-    @staticmethod
-    def biased_sigmoid(neuron, _input):
-        return 1 / (1 + e ** (- neuron.weight * _input + neuron.bias))
+    def sigmoid(_input):
+        return 1 / (1 + e ** (- _input))
 
     @staticmethod
     def binary(_input):
         return 1 if _input >= 0 else 0
 
     @staticmethod
-    def tanh(neuron, _input):
-        return neuron.weight * ((2 / (1 + e ** (- neuron.weight * 2 * _input))) - 1)
-
-    @staticmethod
-    def biased_tanh(neuron, _input):
-        return neuron.weight * ((2 / (1 + e ** (- neuron.weight * 2 * _input + neuron.bias))) - 1)
+    def tanh(_input):
+        return 2 * Neuron.sigmoid(2 * _input) - 1
 
     @staticmethod
     def relu(_input):
@@ -280,27 +272,17 @@ class Neuron:
 
     def _get_function(self, function):
         if function == 'linear':
-            if self.bias is not None:
-                self.function = Neuron.biased_linear
-            else:
-                self.function = Neuron.linear
+            self.function = Neuron.linear
         elif function == 'sigmoid':
-            if self.bias is not None:
-                self.function = Neuron.biased_sigmoid
-            else:
-                self.function = Neuron.sigmoid
+            self.function = Neuron.sigmoid
         elif function == 'binary':
             self.function = Neuron.binary
         elif function == 'tanh':
-            if self.bias is not None:
-                self.function = Neuron.biased_tanh
-            else:
-                self.function = Neuron.tanh
+            self.function = Neuron.tanh
         elif function == 'relu':
             self.function = Neuron.relu
         elif function == 'leaky relu':
             self.function = Neuron.leaky_relu
-        Neuron.check_parameters(self.function, self.weight, self.bias)
 
 
 class Network:
@@ -335,10 +317,9 @@ class Network:
     neural_network = Network(5, [Layer([...]), Layer([...]), Layer([...]), name='John')
     """
 
-    def __init__(self, inputs=None, layers=None, name=None):
+    def __init__(self, layers=None, name=None):
         self.name = None
         self.layers = layers
-        self.inputs = inputs
         self._get_name(name)
         self.sign()
 
@@ -364,11 +345,15 @@ class Network:
         return
 
     @property
+    def inputs(self):
+        return len(self.layers[0].neurons)
+
+    @property
     def data(self):
         """
         Returns all data that determine the neural network as a dictionary.
         """
-        return {self.name: {"layers": [layer.data for layer in self.layers], "inputs": self.inputs}}
+        return {self.name: [layer.data for layer in self.layers]}
 
     @property
     def hidden_neurons(self):
@@ -389,7 +374,7 @@ class Network:
         """
         Returns the number of hidden layers in the network.
         """
-        return len(self.layers) - 1
+        return len(self.layers) - 2
 
     def write_data(self, document=None, directory='data'):
         """
@@ -421,13 +406,17 @@ class Network:
         """
         Receives a iterable of numeric inputs and returns the neural network's evaluation.
         """
-        for layer in self.layers:
+        layer_output = []
+        for n, neuron in enumerate(self.layers[0].neurons):
+            layer_output.append(neuron.evaluate(inputs[n] * neuron.weights))
+        inputs = layer_output
+        for layer in self.layers[1:]:
             layer_output = []
             for neuron in layer.neurons:
-                neuron_output = 0
-                for _input in inputs:
-                    neuron_output += neuron.evaluate(_input)
-                layer_output.append(neuron_output)
+                neuron_input = 0
+                for n, _input in enumerate(inputs):
+                    neuron_input += _input * neuron.weights[n]
+                layer_output.append(neuron.evaluate(neuron_input))
             inputs = layer_output
         return inputs
 
@@ -451,28 +440,23 @@ def load_data(document, name=None, keep_name=False, directory='data'):
         os.mkdir(directory)
         raise NameError(f"There's no '{document}' in '{directory}'.")
     if not os.path.isfile(document_address):
-        raise NameError(f"There's no '{document}' in the {directory}.")
+        raise NameError(f"There's no '{document}.json' in {directory}.")
     with open(document_address, 'r') as file:
         content = json.load(file)
         if name is not None:
-            neural_layers = content[name]['layers']
+            neural_layers = content[name]
             layers = _get_layers(neural_layers)
-            inputs = content[name]['inputs']
             if not keep_name:
                 name = None
-            return Network(inputs, layers, name)
+            return Network(layers, name)
         else:
             neural_names = list(content.keys())
             saved_content = []
             for n, neural in enumerate(content):
-                neural_name = neural_names[n]
-                neural = content[neural_name]
-                neural_layers = neural['layers']
-                inputs = neural['inputs']
-                layers = _get_layers(neural_layers)
+                layers = _get_layers(content[neural_names[n]])
                 if not keep_name:
                     neural_name = None
-                saved_content.append(Network(inputs, layers, neural_name))
+                saved_content.append(Network(layers, neural_name))
             return saved_content
 
 
@@ -482,19 +466,21 @@ def _get_layers(neural_layers):
         layers.append(Layer([]))
         for neuron in layer:
             function = neuron['function']
-            weight = neuron['weight']
+            weights = neuron['weights']
             bias = neuron['bias']
             second_step = neuron['second_step']
-            rand_range = neuron['rand_range']
+            rand_weights_range = neuron['rand_weights_range']
+            rand_bias_range = neuron ['rand_bias_range']
             custom_function = neuron['custom_function']
             custom_second_step = neuron['custom_second_step']
-            layers[n].neurons.append(Neuron(function, weight, bias, second_step,
-                                            rand_range, custom_function, custom_second_step))
+            layers[n].neurons.append(Neuron(function, weights, bias, second_step, rand_weights_range,
+                                            rand_bias_range, custom_function, custom_second_step))
     return layers
 
 
 def random_homogeneous_network(neurons_in_layer, neurons_function=None, neurons_second_step=None, weight=True,
-                               bias=False, rand_range=10, custom_function=False, custom_second_step=False, name=None):
+                               bias=False, rand_weight_range=10, rand_bias_range=None, custom_function=False,
+                               custom_second_step=False, name=None):
     """
     Returns a neural networks in which all neurons have identical parameters, but weight and bias (if they are allowed)
     will be randomly generated for each individual neuron.
@@ -517,20 +503,35 @@ def random_homogeneous_network(neurons_in_layer, neurons_function=None, neurons_
                                                neurons_second_step=None, weight=True, bias=True, rand_range=10,
                                                custom_function=False, custom_second_step=False, name=True)
     """
-    if not custom_function:
-        Neuron.check_parameters(neurons_function, weight, bias)
-    inputs = neurons_in_layer[0]
+    bias = None if bias is False else bias
     layers = []
-    for _layer in neurons_in_layer[1:]:
+    for _layer in neurons_in_layer:
         layer = []
         for neuron in range(_layer):
-            layer.append(Neuron.random(neurons_function, neurons_second_step, weight, bias, rand_range,
-                                       custom_function, custom_second_step))
+            layer.append(Neuron(neurons_function, weight, bias, neurons_second_step, rand_weight_range,
+                                rand_bias_range, custom_function, custom_second_step))
         layers.append(Layer(layer))
-    return Network(inputs, layers, name)
+    return Network(layers, name)
 
 
-def crossover(parent, donor, name=False):
+def _name_crossover(parent_name, donor_name, name):
+    parent_family_name = parent_name.split(' ')[1:]
+    donor_family_name = donor_name.split(' ')[1:]
+    if name and not parent_name.isnumeric() and not donor_name.isnumeric() and type(name) is not str and \
+            len(parent_family_name) > 0 and len(donor_family_name) > 0:
+        child_family_name = []
+        for family_name in donor_family_name:
+            if family_name in parent_family_name:
+                continue
+            child_family_name.append(family_name)
+        child_family_name += parent_family_name
+        name = names.get_first_name() + ' ' + ' '.join(child_family_name)
+    elif name:
+        raise NameError('Donor\'s and parent\'s names are not compatible.')
+    return name
+
+
+def layer_crossover(parent, donor, name=False):
     """
     Returns a new neural network by receiving two other networks, one in the 'parent' variable, other in 'donor'
     variable. The network generated will be  identical the parent but with one of its layers substituted by a copy of
@@ -542,17 +543,19 @@ def crossover(parent, donor, name=False):
     donor_layer_index = random.choice(list(range(len(donor.layers))))
     layers = deepcopy(parent.layers)
     layers[donor_layer_index] = deepcopy(donor.layers[donor_layer_index])
-    parent_family_name = parent.name.split(' ')[1:]
-    donor_family_name = donor.name.split(' ')[1:]
-    if name and not parent.name.isnumeric() and not donor.name.isnumeric() and type(name) is not str and \
-            len(parent_family_name) > 0 and len(donor_family_name) > 0:
-        child_family_name = []
-        for family_name in donor_family_name:
-            if family_name in parent_family_name:
-                continue
-            child_family_name.append(family_name)
-        child_family_name += parent_family_name
-        name = names.get_first_name() + ' ' + ' '.join(child_family_name)
-    elif name:
-        raise NameError('Donor\'s and parent\'s names are not compatible.')
-    return Network(parent.inputs, layers, name=name)
+    name = _name_crossover(parent.name, donor.name, name)
+    return Network(layers, name=name)
+
+
+def n_crossover(parent, donor, name):
+    children_layers = deepcopy(parent.layers)
+    for n, neuron in enumerate(children_layers[0].neurons):
+        neuron.weights = random.choice([neuron.weights, donor.layers[0].neurons[n].weights])
+        neuron.bias = random.choice([neuron.bias, donor.layers[0].neurons[n].bias])
+    for n, layer in enumerate(children_layers[1:]):
+        for m, neuron in enumerate(layer.neurons):
+            for o, weight in enumerate(neuron.weights):
+                children_layers[n + 1].neurons[m].weights[o] = random.choice([weight, donor.layers[n + 1].neurons[m].weights[o]])
+            neuron.bias = random.choice([neuron.bias, donor.layers[n + 1].neurons[m].bias])
+    name = _name_crossover(parent.name, donor.name, name)
+    return Network(children_layers, name)
