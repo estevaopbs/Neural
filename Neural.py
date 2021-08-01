@@ -12,7 +12,7 @@ class Layer:
 
     The properties/methods of a layer are
     neurons -> Its iterable of neurons (list, array, tuple, ...);
-    neural -> The neural network which the layer belongs;
+    network -> The neural network which the layer belongs;
     data -> The list which contains all the data needed to determine the layer;
     mutate -> The method by which the layer can suffer a mutation by choosing randomly one of its neurons and
     calling its mutate method;
@@ -324,6 +324,7 @@ class Network:
     evaluate -> The method by which the network receives a iterable of inputs and returns its evaluation.;
     mutate -> The method by which the network mutates by choosing a random layer and calling its mutate method.
     uniform_mutate -> The method by which the network mutates by a random neuron and calling its mutate method.
+    sign -> The method by which the network signs its layers and its neurons as its own.
 
     All these properties/methods can be seen by neuron.respective_property or neuron.respective_property() if its
     callable.
@@ -337,9 +338,9 @@ class Network:
         self.layers = layers
         self._get_name(name)
         self.neurons = []
-        self._sign()
+        self.sign()
 
-    def _sign(self):
+    def sign(self):
         """
         Signs it's layers as its own.
         """
@@ -568,8 +569,8 @@ def _name_crossover(parent_name, donor_name, name):
 def layer_crossover(parent, donor, name=False):
     """
     Returns a new neural network by receiving two other networks, one in the 'parent' variable, other in 'donor'
-    variable. The network generated will be  identical the parent but with one of its layers randomly substituted by a copy of
-    the correspondent layer of the donor. If the 'name' variable is set 'False' or 'None', the neural network
+    variable. The network generated will be  identical the parent but with one of its layers randomly substituted by a
+    copy of the correspondent layer of the donor. If the 'name' variable is set 'False' or 'None', the neural network
     generated will has its '__hash__' as name. If name is set 'True' and the parent and donor have human names the
     network generated will inherit the parent's and donor's families names, and will also have a random first name. If
     the 'name' variable is a string the generated network will receive this string as name.
@@ -597,8 +598,8 @@ def n_crossover(parent, donor, name):
     for n, layer in enumerate(children_layers[1:]):
         for m, neuron in enumerate(layer.neurons):
             for o, weight in enumerate(neuron.weights):
-                children_layers[n + 1].neurons[m].weights[o] = random.choice([weight, donor.layers[n + 1].neurons[m].weights[o]])
+                children_layers[n + 1].neurons[m].weights[o] = random.choice([weight,
+                                                                              donor.layers[n + 1].neurons[m].weights[o]])
             neuron.bias = random.choice([neuron.bias, donor.layers[n + 1].neurons[m].bias])
     name = _name_crossover(parent.name, donor.name, name)
     return Network(children_layers, name)
-
