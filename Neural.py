@@ -598,8 +598,8 @@ def n_crossover(parent, donor, name):
     for n, layer in enumerate(children_layers[1:]):
         for m, neuron in enumerate(layer.neurons):
             for o, weight in enumerate(neuron.weights):
-                children_layers[n + 1].neurons[m].weights[o] = random.choice([weight,
-                                                                              donor.layers[n + 1].neurons[m].weights[o]])
+                children_layers[n + 1].neurons[m].weights[o] =\
+                    random.choice([weight, donor.layers[n + 1].neurons[m].weights[o]])
             neuron.bias = random.choice([neuron.bias, donor.layers[n + 1].neurons[m].bias])
     name = _name_crossover(parent.name, donor.name, name)
     return Network(children_layers, name)
