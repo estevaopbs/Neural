@@ -1,3 +1,11 @@
+"""
+ oooooooo8  oooooooooo  oooooooooo  
+888          888    888  888    888 
+ 888oooooo   888oooo88   888oooo88  
+        888  888    888  888    888 
+o88oooo888  o888ooo888  o888ooo888  
+"""
+
 import names
 import random
 import os.path
