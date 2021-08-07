@@ -177,7 +177,8 @@ class Neuron:
                 and type(self.bias) is not float:
             raise NameError('Bias\' type is not appropriate.')
         if self.bias is not None and self.rand_bias_range is None:
-            raise NameError('Bias needs a int or float value to \'rand_bias_range\' variable to work.')
+            raise NameError(
+                'Bias needs a int or float value to \'rand_bias_range\' variable to work.')
         if self.rand_weights_range is not None:
             self.rand_weight = self._rand_weight
         if self.rand_bias_range is not None:
@@ -231,7 +232,8 @@ class Neuron:
                 "custom_second_step": self.custom_second_step}
 
     def _mutate_weights(self):
-        self.weights[random.choice(range(len(self.weights)))] = self.rand_weight()
+        self.weights[random.choice(
+            range(len(self.weights)))] = self.rand_weight()
 
     def _mutate_weight(self):
         self.weight = self.rand_weight()
@@ -601,13 +603,17 @@ def n_crossover(parent, donor, name):
     """
     children_layers = deepcopy(parent.layers)
     for n, neuron in enumerate(children_layers[0].neurons):
-        neuron.weights = random.choice([neuron.weights, donor.layers[0].neurons[n].weights])
-        neuron.bias = random.choice([neuron.bias, donor.layers[0].neurons[n].bias])
+        neuron.weights = random.choice(
+            [neuron.weights, donor.layers[0].neurons[n].weights])
+        neuron.bias = random.choice(
+            [neuron.bias, donor.layers[0].neurons[n].bias])
     for n, layer in enumerate(children_layers[1:]):
         for m, neuron in enumerate(layer.neurons):
             for o, weight in enumerate(neuron.weights):
                 children_layers[n + 1].neurons[m].weights[o] =\
-                    random.choice([weight, donor.layers[n + 1].neurons[m].weights[o]])
-            neuron.bias = random.choice([neuron.bias, donor.layers[n + 1].neurons[m].bias])
+                    random.choice(
+                        [weight, donor.layers[n + 1].neurons[m].weights[o]])
+            neuron.bias = random.choice(
+                [neuron.bias, donor.layers[n + 1].neurons[m].bias])
     name = _name_crossover(parent.name, donor.name, name)
     return Network(children_layers, name)
