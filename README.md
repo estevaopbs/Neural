@@ -4,8 +4,8 @@
 
 An easy way to implement:
 - Entirely customisable neural networks;
-- Produce mutations on it;
-- Save and load the networks with .json archives.
+- To roduce mutations on they;
+- To save and load the networks with .json archives.
 
 ## How does it work?
 We have three classes we will use to build our neural Network, they are:
