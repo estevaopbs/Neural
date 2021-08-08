@@ -40,8 +40,8 @@ layer = Layer(neurons)
 
 By the end, to get the neuron we need to provide some parameters this way:
 ```py
-neuron = Neural.Neuron(function, weights, bias, second_step, rand_weights_range, rand_bias_range, custom_function, 
-                       custom_second_step)
+neuron = Neural.Neuron(function, weights, bias, second_step, rand_weights_range, rand_bias_range, 
+                       custom_function, custom_second_step)
 ```
 **function**: Its main function. It must receive a string correspondent to one of the built-in functions described in the functions section or the properly function if custom_function is True;
 
@@ -212,9 +212,9 @@ It will search for a document named as the 'document' argument it received (must
 
 **random_homogeneous_network**: Returns a neural networks in which all neurons have identical parameters, but weight and bias (if they are allowed) will be randomly generated for each individual neuron. It must me called this way:
 ```py
-neural_network = random_homogeneous_network(neurons_in_layer, neurons_function, neurons_second_step, weights, bias, 
-                                            rand_weight_range, rand_bias_range, custom_function, custom_second_step, 
-                                            name)
+neural_network = random_homogeneous_network(neurons_in_layer, neurons_function, neurons_second_step,
+                                            weights, bias, rand_weight_range, rand_bias_range, 
+                                            custom_function, custom_second_step, name)
 ```
 It receives a iterable of integer numbers describing the number of neurons in each layer, like '[3, 4, 4, 5]', which
 mean it would have three input neurons in the input layer, four hidden neurons in the first hidden layer, four
