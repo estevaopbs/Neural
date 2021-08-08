@@ -1,17 +1,13 @@
-"""
- oooooooo8  oooooooooo  oooooooooo  
-888          888    888  888    888 
- 888oooooo   888oooo88   888oooo88  
-        888  888    888  888    888 
-o88oooo888  o888ooo888  o888ooo888  
-"""
-
 import names
 import random
 import os.path
 from math import e
 import json
 from copy import deepcopy
+
+__title__ = 'Neural'
+__version__ = '1.0'
+__author__ = 'estevaopbs'
 
 
 class Layer:
@@ -24,8 +20,6 @@ class Layer:
     data -> The list which contains all the data needed to determine the layer;
     mutate -> The method by which the layer can suffer a mutation by choosing randomly one of its neurons and
     calling its mutate method;
-    sign -> The method by which it is signed by a neural network as its own. It also signs its neurons as its own;
-    It is automatically called when a neural network with the related layer is created.
 
     All these properties/methods can be seen by neuron.respective_property or neuron.respective_property() if its
     callable.
@@ -51,14 +45,14 @@ class Layer:
         """
         random.choice(self.neurons).mutate()
 
-    def sign(self, network):
+    def _sign(self, network):
         """
         Receives the signature of the neural network, enabling it to be accessed from the layer. Also signs each
         neuron of the layer as its own.
         """
         self.network = network
         for neuron in self.neurons:
-            neuron.sign(self)
+            neuron._sign(self)
             self.network.neurons.append(neuron)
 
 
@@ -93,6 +87,8 @@ class Neuron:
     second_step -> Its second step function;
     second_step_name -> The string which name the second step function;
     custom_function -> Boolean value that enables (True) or disable (False) the use of a alternative function;
+    custom_second_step -> Boolean value that enables (True) or disable (False) the use of a alternative second step 
+    function;
     mutate -> Mutate method proper of the neuron that can be called by neuron.mutate() causing it to mutate;
     rand_weights_range = The upper limit of the neuron's random weight generator. The lower is its negative. It's 10 by
     default;
@@ -104,10 +100,6 @@ class Neuron:
     rand_bias -> The method the neuron uses to generate random biases;
     layer -> The layer which the neuron belongs;
     data -> A dictionary with all the information needed to determine the neuron;
-    is incoherent. It is automatically called when the neuron is created;
-    sign -> Method by which it is signed by a layer as its own. It is automatically called when a layer with the
-    related neuron is created. It also generate an adequate number of random weights if it was not included in the
-    neuron generation and set the adequate mutate function.
 
     All these properties/methods can be seen by neuron.respective_property or neuron.respective_property() if its
     callable.
@@ -145,7 +137,7 @@ class Neuron:
         self.input_neuron = False
         self._get_parameters(function, second_step)
 
-    def sign(self, layer):
+    def _sign(self, layer):
         """
         Receives the signature of the layer it belongs, enabling the neuron to access its layer and consequently the
         network. It also generate an adequate number of random weights if it was not included in the neuron generation
@@ -316,9 +308,9 @@ class Network:
     """
     The object which contains layers of neurons by which it can passes an argument to evaluate it.
 
-    Produces a neural network by receiving a iterable of layers and 'None' or a string for 'name' variable. The layers.
-    If name receives 'True', the neural network will be identified by a random human name, if it receives 'False', will
-    be identified by its __hash__ number, if it receives a string it will be identified by the string itself.
+    Produces a neural network by receiving a iterable of layers and a name. If name receives 'True' the neural network
+    will be identified by a random human name, if it receives 'False' or 'None' it will be identified by its __hash__ 
+    number, and if it receives a string it will be identified by the string itself.
 
     The properties/methods of a neural network are
     name -> The tag that identifies it;
@@ -330,11 +322,10 @@ class Network:
     hidden_neurons -> A list with the number of neurons in each of the hidden layers;
     outputs -> The number of output neurons in the network;
     hidden_layers -> The number of hidden layers in the network;
-    write_data -> The method by which neuron's data can be saved in a .json document;
-    evaluate -> The method by which the network receives a iterable of inputs and returns its evaluation.;
-    mutate -> The method by which the network mutates by choosing a random layer and calling its mutate method.
-    uniform_mutate -> The method by which the network mutates by a random neuron and calling its mutate method.
-    sign -> The method by which the network signs its layers and its neurons as its own.
+    save_data -> The method by which neuron's data can be saved in a .json document;
+    evaluate -> The method by which the network receives a iterable of inputs and returns its evaluation;
+    mutate -> The method by which the network mutates by choosing a random layer and calling its mutate method;
+    uniform_mutate -> The method by which the network mutates by a random neuron and calling its mutate method;
 
     All these properties/methods can be seen by neuron.respective_property or neuron.respective_property() if its
     callable.
@@ -348,14 +339,14 @@ class Network:
         self.layers = layers
         self._get_name(name)
         self.neurons = []
-        self.sign()
+        self._sign()
 
-    def sign(self):
+    def _sign(self):
         """
         Signs it's layers as its own.
         """
         for layer in self.layers:
-            layer.sign(self)
+            layer._sign(self)
 
     def uniform_mutate(self):
         """
@@ -419,7 +410,7 @@ class Network:
         """
         return len(self.layers) - 2
 
-    def write_data(self, document=None, directory='data'):
+    def save_data(self, document=None, directory='data'):
         """
         Produces a .json document with the neuron's data. The document will be named as the 'document' argument received
         by the function (it must be a string), and it will be saved in the directory named by the 'directory' argument
@@ -440,10 +431,10 @@ class Network:
                 content = json.load(file)
                 content.update(self.data)
                 file.seek(0)
-                json.dump(content, file, indent=6)
+                json.dump(content, file, indent=4)
         else:
             with open(file_address, 'a+') as file:
-                json.dump(self.data, file, indent=6)
+                json.dump(self.data, file, indent=4)
 
     def evaluate(self, inputs):
         """
