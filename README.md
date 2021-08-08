@@ -68,7 +68,7 @@ The built-in functions are:
 - leaky relu: returns (0.01 * input) if the input is less than zero otherwise returns the input.
 
 Using the linear function as an example, to use one of the built-in functions you must do this way when creating a neuron
-```
+```py
 neuron = Neural.Neuron(function='linear', ..., custom_function=False, ...)
 ```
 But if you want to use other function than one of these, there are two ways to do this. You can define a function and use it as input or use a lambda function, as you can see in the example below.
