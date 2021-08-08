@@ -200,7 +200,7 @@ created.
 ### Neuron
 **mutate**: Mutate method proper of the neuron that can be called by neuron.mutate() causing it to mutate;
 
-### __main__
+### \_\_main\_\_
 **load_data**: This method reads a .json document and returns the neural networks saved in it. It must be called this way:
 ```py
 neural_network = load_data(document, name, keep_name, directory)
