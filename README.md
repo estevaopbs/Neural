@@ -140,7 +140,7 @@ neuron = Neural.Neuron(..., second_step=square_function, ...,custom_second_step=
 
 **data**: The list which contains all the data needed to determine the layer;
 
-## Neuron
+### Neuron
 **function**: Its main function;
 
 **function_name**: The string which name the main function;
