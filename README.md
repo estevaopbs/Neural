@@ -29,6 +29,7 @@ To build a neural network we need to give it layers of neurons, and a name that 
 neural_network = Neural.Network(layers, name)
 ```
 **layers**: Iiterable of Layers (list, tuple, set, array, ...).
+
 **name**: If name receives 'True', the neural network will be identified by a random human name, if it receives 'False' or none it will be identified by its \_\_hash\_\_ number and if it receives a string it will be identified by the string itself.
 
 To get the layers we will use
