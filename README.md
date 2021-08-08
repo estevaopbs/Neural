@@ -179,7 +179,7 @@ All these properties/methods can be obtained by \<object>.\<property>.
 ## Methods
 
 ### Network
-**save_data**:This method produces a .json document with the neuron's data. It must be called this way:
+**save_data**: This method produces a .json document with the neuron's data. It must be called this way:
 ```py
 neural_network.save_data(self, document, directory)
 ```
