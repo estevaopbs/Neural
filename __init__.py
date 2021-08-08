@@ -5,9 +5,11 @@ from math import e
 import json
 from copy import deepcopy
 
+
 __title__ = 'Neural'
-__version__ = '1.0'
+__version__ = '1.01'
 __author__ = 'estevaopbs'
+__doc__ = 'https://github.com/estevaopbs/Neural'
 
 
 class Layer:
