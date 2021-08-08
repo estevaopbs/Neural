@@ -7,7 +7,7 @@ An easy way to implement:
 - Produce mutations on it;
 - Save and load the networks with .json archives.
 
-## How does this work?
+## How does it work?
 We have three classes we will use to build our neural Network, they are:
 - Neuron: A set of weights and functions which represents the minimal unity of calculations of the network;
 - Layer: A set of neurons;
