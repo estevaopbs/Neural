@@ -40,7 +40,9 @@ layer = Layer(neurons)
 
 By the end, to get the neuron we need to provide some parameters this way:
 ```py
-neuron = Neural.Neuron(function, weights, bias, second_step, rand_weights_range, rand_bias_range, custom_function, custom_second_step)
+neuron = Neural.Neuron(function, weights, bias, second_step, 
+                       rand_weights_range, rand_bias_range, 
+                       custom_function, custom_second_step)
 ```
 **function**: Its main function. It must receive a string correspondent to one of the built-in functions described in the functions section or the properly function if custom_function is True;
 
@@ -69,7 +71,8 @@ The built-in functions are:
 
 Using the linear function as an example, to use one of the built-in functions you must do this way when creating a neuron
 ```py
-neuron = Neural.Neuron(function='linear', ..., custom_function=False, ...)
+neuron = Neural.Neuron(function='linear', ..., 
+                       custom_function=False, ...)
 ```
 But if you want to use other function than one of these, there are two ways to do this. You can define a function and use it as input or use a lambda function, as you can see in the example below.
 
@@ -80,18 +83,21 @@ def square_function(x):
     return x ** 2
 
 
-neuron = Neural.Neuron(function=square_function, ..., custom_function=True, ...)
+neuron = Neural.Neuron(function=square_function, ..., 
+                       custom_function=True, ...)
 ```
 
 Using a lambda function:
 
 ```py
-neuron = Neural.Neuron(function=lambda x: x ** 2, ..., custom_function=True, ...)
+neuron = Neural.Neuron(function=lambda x: x ** 2, ..., 
+                       custom_function=True, ...)
 
 # or
 
 square_function = lambda x: x ** 2
-neuron = Neural.Neuron(function=square_function, ..., custom_function=True, ...)
+neuron = Neural.Neuron(function=square_function, ..., 
+                       custom_function=True, ...)
 ```
 
 The second step function, works the exact same way. Using a defined function:
@@ -101,18 +107,21 @@ def square_function(x):
     return x ** 2
 
 
-neuron = Neural.Neuron(..., second_step=square_function, ..., custom_second_step=True)
+neuron = Neural.Neuron(..., second_step=square_function, 
+                       ..., custom_second_step=True)
 ```
 
 Using a lambda function:
 
 ```py
-neuron = Neural.Neuron(..., second_step=lambda x: x ** 2, ..., custom_second_step=True)
+neuron = Neural.Neuron(..., second_step=lambda x: x ** 2, 
+                       ..., custom_second_step=True)
 
 # or
 
 square_function = lambda x: x ** 2
-neuron = Neural.Neuron(..., second_step=square_function, ...,custom_second_step=True)
+neuron = Neural.Neuron(..., second_step=square_function, 
+                       ...,custom_second_step=True)
 ```
 ## Properties
 ### Network
