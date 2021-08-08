@@ -35,7 +35,7 @@ To get the layers we will use
 ```py
 layer = Layer(neurons)
 ```
-neurons: Iterable of Neurons (list, tuple, set, array, ...).
+**neurons**: Iterable of Neurons (list, tuple, set, array, ...).
 
 By the end, to get the neuron we need to provide some parameters this way:
 ```py
