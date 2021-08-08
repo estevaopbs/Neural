@@ -237,8 +237,7 @@ generated will has its '\_\_hash__' as name. If name is set 'True' and the paren
 network generated will inherit the parent's and donor's families names, and will also have a random first name. If
 the 'name' variable is a string the generated network will receive this string as name.
 
-**n_crossover**
-Returns a new neural network by mixing the neurons of two other networks, one in the 'parent' variable, other in 'donor' variable. It must be called like 
+**n_crossover**: Returns a new neural network by mixing the neurons of two other networks, one in the 'parent' variable, other in 'donor' variable. It must be called like 
 ```py
 child_network = n_crossover(parent, donor, name)
 ```
