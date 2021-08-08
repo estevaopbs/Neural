@@ -4,7 +4,7 @@
 
 An easy way to implement:
 - Entirely customisable neural networks;
-- To roduce mutations on they;
+- To produce mutations on they;
 - To save and load the networks with .json archives.
 
 ## How does it work?
