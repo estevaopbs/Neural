@@ -8,7 +8,7 @@ An easy way to implement:
 - To save and load the networks with .json archives.
 
 ## How does it work?
-We have three classes we will use to build our neural Network, they are:
+We have three classes we will use to build our neural network, they are:
 - Neuron: A set of weights and functions which represents the minimal unity of calculations of the network;
 - Layer: A set of neurons;
 - Network: A set of neurons' layers.
