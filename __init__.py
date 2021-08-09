@@ -1,4 +1,5 @@
-import names
+from Neural.names.main import *
+from Neural.names import *
 import random
 import os.path
 from math import e
@@ -361,7 +362,7 @@ class Network:
         Identifies the neural network with a name tag.
         """
         if name is True:
-            self.name = names.get_full_name()
+            self.name = get_full_name()
         elif name is False or name is None:
             self.name = str(self.__hash__())
         elif type(name) is str:
@@ -564,7 +565,7 @@ def _name_crossover(parent_name, donor_name, name):
                 continue
             child_family_name.append(family_name)
         child_family_name += parent_family_name
-        name = names.get_first_name() + ' ' + ' '.join(child_family_name)
+        name = get_first_name() + ' ' + ' '.join(child_family_name)
     elif name:
         raise NameError('Donor\'s and parent\'s names are not compatible.')
     return name
