@@ -235,7 +235,7 @@ string as a name, and when  it is None, the network receives its \_\_hash\_\_ as
 ```py
 child_network = layer_crossover(parent, donor, name)
 ```
-The network generated will be  identical the parent but with one of its layers randomly substituted by a
+The network generated will be  identical to the parent but with one of its layers randomly substituted by a
 copy of the correspondent layer of the donor. If the 'name' variable is set 'False' or 'None', the neural network
 generated will has its '\_\_hash__' as name. If name is set 'True' and the parent and donor have human names the
 network generated will inherit the parent's and donor's families names, and will also have a random first name. If
@@ -245,7 +245,7 @@ the 'name' variable is a string the generated network will receive this string a
 ```py
 child_network = n_crossover(parent, donor, name)
 ```
-The network generated will be  identical the parent but with one of its neurons randomly substituted by a
+The network generated will be  identical to the parent but with one of its neurons randomly substituted by a
 copy of the correspondent neuron of the donor. If the 'name' variable is set 'False' or 'None', the neural network
 generated will has its '\_\_hash\_\_' as name. If name is set 'True' and the parent and donor have human names the
 network generated will inherit the parent's and donor's families names, and will also have a random first name. If
