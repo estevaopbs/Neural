@@ -59,7 +59,7 @@ neuron = Neural.Neuron(function, weights, bias, second_step, rand_weights_range,
 
 **custom\_second\_step**: Boolean value that enables (True) or disable (False) the use of a alternative second step function.
 
-#### Functions
+### Neurons' functions
 The built-in functions are:
 - linear: returns weight * input + bias;
 - sigmoid: returns 1 / (1 + e ^ - (weight * input + bias));
@@ -115,8 +115,8 @@ neuron = Neural.Neuron(..., second_step=lambda x: x ** 2, ..., custom_second_ste
 square_function = lambda x: x ** 2
 neuron = Neural.Neuron(..., second_step=square_function, ...,custom_second_step=True)
 ```
-## Properties
-### Network
+### Properties
+#### Network
 **name**: The tag that identifies it;
 
 **layers**: Its iterable of layers (list, array, tuple, ...);
@@ -135,14 +135,14 @@ neuron = Neural.Neuron(..., second_step=square_function, ...,custom_second_step=
 
 **hidden_layers**: The number of hidden layers in the network;
 
-### Layer
+#### Layer
 **neurons**: Its iterable of neurons (list, array, tuple, ...);
 
 **network**: The neural network which the layer belongs;
 
 **data**: The list which contains all the data needed to determine the layer;
 
-### Neuron
+#### Neuron
 **function**: Its main function;
 
 **function_name**: The string which name the main function;
@@ -177,9 +177,9 @@ default;
 
 All these properties/methods can be obtained by \<object>.\<property>.
 
-## Class methods
+### Class methods
 
-### Network
+#### Network
 **save_data**: This method produces a .json document with the neuron's data. It must be called this way:
 ```py
 neural_network.save_data(self, document, directory)
@@ -196,13 +196,13 @@ created;
 
 **uniform_mutate**: The method by which the network mutates by a random neuron and calling its mutate method.
 
-### Layer
+#### Layer
 **mutate**: The method by which the layer can suffer a mutation by choosing randomly one of its neurons and calling its mutate method.
 
-### Neuron
+#### Neuron
 **mutate**: Mutate method proper of the neuron that can be called by neuron.mutate() causing it to mutate.
 
-## Functions
+### Functions
 **load_data**: This method reads a .json document and returns the neural networks saved in it. It must be called this way:
 ```py
 neural_network = load_data(document, name, keep_name, directory)
