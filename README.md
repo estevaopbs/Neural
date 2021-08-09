@@ -102,8 +102,7 @@ def square_function(x):
     return x ** 2
 
 
-neuron = Neural.Neuron(..., second_step=square_function, 
-                       ..., custom_second_step=True)
+neuron = Neural.Neuron(..., second_step=square_function, ..., custom_second_step=True)
 ```
 
 Using a lambda function:
