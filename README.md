@@ -119,7 +119,7 @@ neuron = Neural.Neuron(..., second_step=square_function, ...,custom_second_step=
 ### Network
 **name**: The tag that identifies it;
 
-**layers**: Its iterable of layers (list, array, tuple, ...), but without the input neurons;
+**layers**: Its iterable of layers (list, array, tuple, ...);
 
 **inputs**: Its number of waited inputs, it means, the number of input neurons;
 
