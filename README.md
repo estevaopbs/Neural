@@ -5,7 +5,7 @@
 An easy way to 
 - implement entirely customisable neural networks;
 - produce mutations on they;
-- save and load the networks with .json archives.
+- save and load the networks with .json files.
 
 ## How does it work?
 We have three classes we will use to build our neural network, they are:
