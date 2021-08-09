@@ -177,7 +177,7 @@ default;
 
 All these properties/methods can be obtained by \<object>.\<property>.
 
-## Methods
+## Class methods
 
 ### Network
 **save_data**: This method produces a .json document with the neuron's data. It must be called this way:
@@ -202,7 +202,7 @@ created;
 ### Neuron
 **mutate**: Mutate method proper of the neuron that can be called by neuron.mutate() causing it to mutate.
 
-### \_\_main\_\_
+## Functions
 **load_data**: This method reads a .json document and returns the neural networks saved in it. It must be called this way:
 ```py
 neural_network = load_data(document, name, keep_name, directory)
