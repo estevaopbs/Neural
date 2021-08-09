@@ -481,21 +481,20 @@ def load_data(document, name=None, keep_name=False, directory='data'):
     with open(document_address, 'r') as file:
         content = json.load(file)
         if name is not None:
-            neural_layers = content[name]
-            layers = _get_layers(neural_layers)
+            network_layers = content[name]
+            layers = _get_layers(network_layers)
             if not keep_name:
                 name = None
             return Network(layers, name)
         else:
-            neural_names = list(content.keys())
             saved_content = []
-            for n, neural in enumerate(content):
-                layers = _get_layers(content[neural_names[n]])
+            for _name, _layers in zip(content.keys(), content.values()):
+                layers = _get_layers(_layers)
                 if not keep_name:
-                    neural_name = None
+                    name = None
                 else:
-                    neural_name = neural_names[n]
-                saved_content.append(Network(layers, neural_name))
+                    name = _name
+                saved_content.append(Network(layers, name))
             return saved_content
 
 
