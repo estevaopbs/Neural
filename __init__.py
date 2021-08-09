@@ -8,7 +8,7 @@ from copy import deepcopy
 
 
 __title__ = 'Neural'
-__version__ = '1.01'
+__version__ = '1.0'
 __author__ = 'estevaopbs'
 __doc__ = 'https://github.com/estevaopbs/Neural'
 
