@@ -2,10 +2,10 @@
 ## _Easy fully customisable neural networks with python_
 [![N|sbb](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.redd.it%2Fcv563jzwax831.jpg&f=1&nofb=1)](https://github.com/estevaopbs/)
 
-An easy way to implement:
-- Entirely customisable neural networks;
-- To produce mutations on they;
-- To save and load the networks with .json archives.
+An easy way to 
+- implement entirely customisable neural networks;
+- produce mutations on they;
+- save and load the networks with .json archives.
 
 ## How does it work?
 We have three classes we will use to build our neural network, they are:
