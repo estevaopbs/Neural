@@ -124,7 +124,7 @@ neuron = Neural.Neuron(..., second_step=square_function, ...,custom_second_step=
 
 **inputs**: Its number of waited inputs, it means, the number of input neurons;
 
-**neurons**: The list of all neurons
+**neurons**: The list of all neurons;
 
 **shape**:  Its number of neurons in each layer;
 
@@ -189,26 +189,26 @@ The document will be named as the 'document' argument received
 by the function (it must be a string), and it will be saved in the directory named by the 'directory' argument
 received (also a string) that is 'data' by default. If the folder name by directory does not existed it will be
 crated. If the document already exists, the information will be appended, otherwise, the document will be
-created.
+created;
 
 **evaluate**: The method by which the network receives a iterable of inputs and returns its evaluation;
 
 **mutate**: The method by which the network mutates by choosing a random layer and calling its mutate method;
 
-**uniform_mutate**: The method by which the network mutates by a random neuron and calling its mutate method;
+**uniform_mutate**: The method by which the network mutates by a random neuron and calling its mutate method.
 
 ### Layer
-**mutate**: The method by which the layer can suffer a mutation by choosing randomly one of its neurons and calling its mutate method;
+**mutate**: The method by which the layer can suffer a mutation by choosing randomly one of its neurons and calling its mutate method.
 
 ### Neuron
-**mutate**: Mutate method proper of the neuron that can be called by neuron.mutate() causing it to mutate;
+**mutate**: Mutate method proper of the neuron that can be called by neuron.mutate() causing it to mutate.
 
 ### \_\_main\_\_
 **load_data**: This method reads a .json document and returns the neural networks saved in it. It must be called this way:
 ```py
 neural_network = load_data(document, name, keep_name, directory)
 ```
-It will search for a document named as the 'document' argument it received (must be a string) in the directory passed ('data' by default). If it is passed a name (string), it return only the neural network with such name, otherwise, it will return a list with all the neural networks contained in the document.
+It will search for a document named as the 'document' argument it received (must be a string) in the directory passed ('data' by default). If it is passed a name (string), it return only the neural network with such name, otherwise, it will return a list with all the neural networks contained in the document;
 
 **random_homogeneous_network**: Returns a neural networks in which all neurons have identical parameters, but weight and bias (if they are allowed) will be randomly generated for each individual neuron. It must me called this way:
 ```py
@@ -228,7 +228,7 @@ the default it is None.  The 'custom_function' and 'custom_second_step' variable
 custom functions in the neurons. Set it 'True' to use custom functions, 'False' to built-in ones. By default they
 are set as 'False', it behaviours the same way as if it is 'None'. When Name is 'True' it makes the generated
 network has a random human name as name, when it is a string it makes the generated neural network has the related
-string as a name, and when  it is None, the network receives its \_\_hash\_\_ as name.
+string as a name, and when  it is None, the network receives its \_\_hash\_\_ as name;
 
 
 **layer_crossover**: Returns a new neural network by mixing the layers of two other networks. It must be called like
@@ -239,7 +239,7 @@ The network generated will be  identical to the parent but with one of its layer
 copy of the correspondent layer of the donor. If the 'name' variable is set 'False' or 'None', the neural network
 generated will has its '\_\_hash__' as name. If name is set 'True' and the parent and donor have human names the
 network generated will inherit the parent's and donor's families names, and will also have a random first name. If
-the 'name' variable is a string the generated network will receive this string as name.
+the 'name' variable is a string the generated network will receive this string as name;
 
 **n_crossover**: Returns a new neural network by mixing the neurons of two other networks, one in the 'parent' variable, other in 'donor' variable. It must be called like 
 ```py

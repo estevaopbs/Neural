@@ -21,7 +21,7 @@ class Layer:
     network -> The neural network which the layer belongs;
     data -> The list which contains all the data needed to determine the layer;
     mutate -> The method by which the layer can suffer a mutation by choosing randomly one of its neurons and
-    calling its mutate method;
+    calling its mutate method.
 
     All these properties/methods can be seen by neuron.respective_property or neuron.respective_property() if its
     callable.
@@ -101,7 +101,7 @@ class Neuron:
     rand_weight -> The method the neuron uses to generate random weights;
     rand_bias -> The method the neuron uses to generate random biases;
     layer -> The layer which the neuron belongs;
-    data -> A dictionary with all the information needed to determine the neuron;
+    data -> A dictionary with all the information needed to determine the neuron.
 
     All these properties/methods can be seen by neuron.respective_property or neuron.respective_property() if its
     callable.
@@ -318,7 +318,7 @@ class Network:
     name -> The tag that identifies it;
     layers -> Its iterable of layers (list, array, tuple, ...), but without the input neurons;
     inputs -> Its number of waited inputs, it means, the number of input neurons;
-    neurons - The list of all neurons
+    neurons - The list of all neurons;
     shape -  Its number of neurons in each layer;
     data -> A dictionary with all the information needed to determine the neural network;
     hidden_neurons -> A list with the number of neurons in each of the hidden layers;
@@ -327,7 +327,7 @@ class Network:
     save_data -> The method by which neuron's data can be saved in a .json document;
     evaluate -> The method by which the network receives a iterable of inputs and returns its evaluation;
     mutate -> The method by which the network mutates by choosing a random layer and calling its mutate method;
-    uniform_mutate -> The method by which the network mutates by a random neuron and calling its mutate method;
+    uniform_mutate -> The method by which the network mutates by a random neuron and calling its mutate method.
 
     All these properties/methods can be seen by neuron.respective_property or neuron.respective_property() if its
     callable.
