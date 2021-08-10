@@ -13,24 +13,41 @@ We have three classes we will use to build our neural network, they are:
 - Layer: A set of neurons;
 - Network: A set of neurons' layers.
 
-We create a neural network by providing its layers of neurons. Each Neuron has a number of weights correspondent to the number of bondings it has with the previous layer. So, as an example, let's imagine a neural network with three layers, the first one, with four neurons, the second with five, the third with two.
+We create a neural network by providing its layers of neurons. Each Neuron has a number of weights correspondent to the 
+number of bondings it has with the previous layer. So, as an example, let's imagine a neural network with three layers, 
+the first one, with four neurons, the second with five, the third with two.
 
-The first layer, also known as input layer, doesn't has any neuron before it because it is, as the name suggests, the layer that receive the inputs, what means that we have only four inputs in this hypotetical situation. So in this layer, each neuron has only one weight value which will be applied to the correspondent input. The input will be multiplied by weight of the correspondent neuron, then if the neuron has a bias it will be added, the result will be evaluated by the neuron's function, after this, if the neuron has a second step function the result will be evaluated by it, if not so it doesn't, and the result will be passed to the next layer.
+The first layer, also known as input layer, doesn't has any neuron before it because it is, as the name suggests, the 
+layer that receive the inputs, what means that we have only four inputs in this hypotetical situation. So in this layer, 
+each neuron has only one weight value which will be applied to the correspondent input. The input will be multiplied by 
+weight of the correspondent neuron, then if the neuron has a bias it will be added, the result will be evaluated by the 
+neuron's function, after this, if the neuron has a second step function the result will be evaluated by it, if not so it 
+doesn't, and the result will be passed to the next layer.
 
-Now, let's take a look to a neuron located in the second layer. The first layer has
-four neurons, so this neuron will receive four values to evaluate. Each one of the received values will be multiplied by the neuron's correspondent bonding weight. It means this neuron has one weight which connect him with one neuron of the previous layer. In this context, these weights are analogous to the axons. Then the results will be summed, in sequence if the neuron in question has a bias it will be added and the result will be evaluated by the function, after this, if the neuron has a second step function the result will be evaluated by it, if not so it doesn't, and the result will be passed to the next layer.
+Now, let's take a look to a neuron located in the second layer. The first layer has four neurons, so this neuron will 
+receive four values to evaluate. Each one of the received values will be multiplied by the neuron's correspondent 
+bonding weight. It means this neuron has one weight which connect him with one neuron of the previous layer. In this 
+context, these weights are analogous to the axons. Then the results will be summed, in sequence if the neuron in 
+question has a bias it will be added and the result will be evaluated by the function, after this, if the neuron has a 
+second step function the result will be evaluated by it, if not so it doesn't, and the result will be passed to the next 
+layer.
 
-Finnaly in the last layer. Here everything will happen the same way it happened in the previous layer, the only difference is that is our last neurons' layer, it can also be named as output layer, consequently the results obtained here will not be passed to other neurons, the two results obained here from the last two neurons will be the final result of the network's evaluation.
+Lastly, look into the last layer. Here everything will happen the same way it happened in the previous layer, the only 
+difference is that is our last neurons' layer, it can also be named as output layer, consequently the results obtained 
+here will not be passed to other neurons, the two results obained here from the last two neurons will be the final 
+result of the network's evaluation.
 
 
 ## How to use this thing?
-To build a neural network we need to give it layers of neurons, and a name that will be the tag by which it  will be identified. So we can create a Network object this way:
+To build a neural network we need to give it layers of neurons, and a name that will be the tag by which it  will be 
+identified. So we can create a Network object this way:
 ```py
 neural_network = Neural.Network(layers, name)
 ```
 **layers**: Iiterable of Layers (list, tuple, set, array, ...).
 
-**name**: If name receives 'True', the neural network will be identified by a random human name, if it receives 'False' or none it will be identified by its \_\_hash\_\_ number and if it receives a string it will be identified by the string itself.
+**name**: If name receives 'True', the neural network will be identified by a random human name, if it receives 'False' 
+or none it will be identified by its \_\_hash\_\_ number and if it receives a string it will be identified by the string itself.
 
 To get the layers we will use
 ```py
@@ -43,21 +60,29 @@ By the end, to get the neuron we need to provide some parameters this way:
 neuron = Neural.Neuron(function, weights, bias, second_step, rand_weights_range, rand_bias_range, 
                        custom_function, custom_second_step)
 ```
-**function**: Its main function. It must receive a string correspondent to one of the built-in functions described in the functions section or the properly function if custom_function is True;
+**function**: Its main function. It must receive a string correspondent to one of the built-in functions described in 
+the functions section or the properly function if custom_function is True;
 
-**weights**: Its multiplicative factors for each input. When it's 'None', it will never be changed by a mutate call, When it's True, an adequate number of random weights will be generated by the _sign method when the neuron be inserted in a network. It can als receive a list of ints or floats or receive a single int or float to have its values pre-set;
+**weights**: Its multiplicative factors for each input. When it's 'None', it will never be changed by a mutate call, 
+When it's True, an adequate number of random weights will be generated by the _sign method when the neuron be inserted 
+in a network. It can als receive a list of ints or floats or receive a single int or float to have its values pre-set;
 
-**bias**: Its additive factor. When it's 'None', it will work as zero in the built-in functions, and it will never be changed by a mutate call. When it's True, a random bias will be generated. It can also receives a int or float tohave its value pre-set;
+**bias**: Its additive factor. When it's 'None', it will work as zero in the built-in functions, and it will never be 
+changed by a mutate call. When it's True, a random bias will be generated. It can also receives a int or float tohave its value pre-set;
 
-**second\_step**: Its second step function. It must receive a string correspondent to one of the built-in functions described in the functions section or the properly function if custom\_second\_step is True;
+**second\_step**: Its second step function. It must receive a string correspondent to one of the built-in functions 
+described in the functions section or the properly function if custom\_second\_step is True;
 
-**rand\_weights\_range**: The upper limit of the neuron's random weight generator. The lower is its negative. It's 10 by default;
+**rand\_weights\_range**: The upper limit of the neuron's random weight generator. The lower is its negative. It's 10 
+by default;
 
-**rand\_bias\_range**: The upper limit of the neuron's random weight generator. The lower is its negative. It's None bydefault. When it's None, no bias will be added to the inputs and no bias will be able to be generated in a mutate call;
+**rand\_bias\_range**: The upper limit of the neuron's random weight generator. The lower is its negative. It's None by
+default. When it's None, no bias will be added to the inputs and no bias will be able to be generated in a mutate call;
 
 **custom\_function**: Boolean value that enables (True) or disable (False) the use of a alternative function;
 
-**custom\_second\_step**: Boolean value that enables (True) or disable (False) the use of a alternative second step function.
+**custom\_second\_step**: Boolean value that enables (True) or disable (False) the use of a alternative second step 
+function.
 
 ### Neurons' functions
 The built-in functions are:
@@ -68,11 +93,13 @@ The built-in functions are:
 - relu: returns maximum value between zero and the input;
 - leaky relu: returns (0.01 * input) if the input is less than zero otherwise returns the input.
 
-Using the linear function as an example, to use one of the built-in functions you must do this way when creating a neuron
+Using the linear function as an example, to use one of the built-in functions you must do this way when creating a 
+neuron
 ```py
 neuron = Neural.Neuron(function='linear', ..., custom_function=False, ...)
 ```
-But if you want to use other function than one of these, there are two ways to do this. You can define a function and use it as input or use a lambda function, as you can see in the example below.
+But if you want to use other function than one of these, there are two ways to do this. You can define a function and 
+use it as input or use a lambda function, as you can see in the example below.
 
 Using a defined function:
 
@@ -163,7 +190,8 @@ function;
 **rand_weights_range**: The upper limit of the neuron's random weight generator. The lower is its negative. It's 10 by
 default;
 
-**rand_bias_range**: The upper limit of the neuron's random weight generator. The lower is its negative. It's None by default. When it's None, no bias will be added to the inputs and no bias will be able to be generated in a mutatecall;
+**rand_bias_range**: The upper limit of the neuron's random weight generator. The lower is its negative. It's None by 
+default. When it's None, no bias will be added to the inputs and no bias will be able to be generated in a mutatecall;
 
 **evaluate**: The method which the neuron receives a input and outputs its evaluation;
 
@@ -197,7 +225,8 @@ created;
 **uniform_mutate**: The method by which the network mutates by a random neuron and calling its mutate method.
 
 #### Layer
-**mutate**: The method by which the layer can suffer a mutation by choosing randomly one of its neurons and calling its mutate method.
+**mutate**: The method by which the layer can suffer a mutation by choosing randomly one of its neurons and calling its 
+mutate method.
 
 #### Neuron
 **mutate**: Mutate method proper of the neuron that can be called by neuron.mutate() causing it to mutate.
@@ -207,9 +236,12 @@ created;
 ```py
 neural_network = load_data(document, name, keep_name, directory)
 ```
-It will search for a document named as the 'document' argument it received (must be a string) in the directory passed ('data' by default). If it is passed a name (string), it return only the neural network with such name, otherwise, it will return a list with all the neural networks contained in the document;
+It will search for a document named as the 'document' argument it received (must be a string) in the directory passed 
+('data' by default). If it is passed a name (string), it return only the neural network with such name, otherwise, it 
+will return a list with all the neural networks contained in the document;
 
-**random_homogeneous_network**: Returns a neural networks in which all neurons have identical parameters, but weight and bias (if they are allowed) will be randomly generated for each individual neuron. It must me called this way:
+**random_homogeneous_network**: Returns a neural networks in which all neurons have identical parameters, but weight and 
+bias (if they are allowed) will be randomly generated for each individual neuron. It must me called this way:
 ```py
 neural_network = random_homogeneous_network(neurons_in_layer, neurons_function, neurons_second_step,
                                             weights, bias, rand_weight_range, rand_bias_range, 
@@ -240,7 +272,8 @@ generated will has its '\_\_hash__' as name. If name is set 'True' and the paren
 network generated will inherit the parent's and donor's families names, and will also have a random first name. If
 the 'name' variable is a string the generated network will receive this string as name;
 
-**n_crossover**: Returns a new neural network by mixing the neurons of two other networks, one in the 'parent' variable, other in 'donor' variable. It must be called like 
+**n_crossover**: Returns a new neural network by mixing the neurons of two other networks, one in the 'parent' variable, 
+other in 'donor' variable. It must be called like 
 ```py
 child_network = n_crossover(parent, donor, name)
 ```
