@@ -1,11 +1,11 @@
 from .source import (
-    Crossover,
-    Layer,
-    Network,
-    Neuron,
-    NeuronDerivative,
-    NeuronFunction,
-    NeuronRandomGenerator,
+    crossover,
+    layer,
+    network,
+    neuron,
+    ActivationDerivative,
+    ActivationFunction,
+    RandomGenerator,
 )
 
 # from .tests import *

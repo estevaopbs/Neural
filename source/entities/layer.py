@@ -4,7 +4,7 @@ import random
 from numbers import Number
 from typing import Callable, List, Type
 
-from .Neuron import Neuron
+from .neuron import Neuron
 
 
 class Layer:
@@ -41,6 +41,14 @@ class Layer:
     def data(self):
         return [neuron.data for neuron in self.neurons]
 
+    @property
+    def bias_mutable_neurons(self):
+        return [neuron for neuron in self.neurons if neuron.rand_bias is not None]
+
+    @property
+    def weight_mutable_neurons(self) -> List[Neuron]:
+        return [neuron for neuron in self.neurons if neuron.rand_weight is not None]
+
     @classmethod
     def from_data(cls, data, NeuronClass: Type[Neuron] = Neuron) -> Layer:
         return cls([NeuronClass.from_data(datum) for datum in data])
@@ -49,48 +57,51 @@ class Layer:
     def from_random(
         cls,
         size: int,
+        activation: Callable[[Number], Number],
         weights: int,
-        first_step: Callable[[Number], Number],
-        rand_weights_generator: Callable[[], Number],
+        rand_weight: Callable[[], Number],
         second_step: Callable[[Number], Number] | None = None,
-        rand_bias_generator: Callable[[], Number] | None = None,
+        rand_bias: Callable[[], Number] | None = None,
         derivative: Callable[[Number], Number] | None = None,
         NeuronClass: Type[Neuron] = Neuron,
     ) -> Layer:
         return cls(
             [
                 NeuronClass.from_random(
-                    weights,
-                    first_step,
-                    rand_weights_generator,
-                    second_step,
-                    rand_bias_generator,
-                    derivative,
+                    weights, activation, rand_weight, second_step, rand_bias, derivative
                 )
                 for _ in range(size)
             ]
         )
 
-    def enforce_weights(self, weights: int):
+    def _attune_weights(self, weights: int):
         for neuron in self.neurons:
-            neuron.enforce_weights(weights)
+            neuron._attune_weights(weights)
 
     def evaluate(self, inputs: List[Number]) -> List[Number]:
         return [neuron.evaluate(inputs) for neuron in self.neurons]
 
-    def mutate_weight(self):
-        random.choice(self.neurons).mutate_weight()
-
-    def mutate_bias(self):
-        random.choice(self.neurons).mutate_bias()
-
-    def mutate_weights(self, neurons: int):
-        for _ in range(neurons):
-            self.mutate_weight()
+    def mutate_weights(self, neurons: int = 1, weights: int = 1):
+        if not isinstance(neurons, int):
+            raise TypeError("Neurons must be an integer, not {}".format(type(neurons)))
+        mutable_neurons = self.weight_mutable_neurons
+        if neurons > len(mutable_neurons) or neurons < 1:
+            raise ValueError(
+                "Invalid number of neurons to mutate. Must be between 1 and the number of mutable neurons."
+            )
+        for neuron in random.sample(mutable_neurons, neurons):
+            neuron.mutate_weights(weights)
 
     def mutate_biases(self, neurons: int):
-        for _ in range(neurons):
-            self.mutate_bias()
+        mutable_neurons = self.bias_mutable_neurons
+        if not isinstance(neurons, int):
+            raise TypeError("Neurons must be an integer, not {}".format(type(neurons)))
+        if neurons > len(mutable_neurons) or neurons < 1:
+            raise ValueError(
+                "Invalid number of neurons to mutate. Must be between 1 and the number of mutable neurons."
+            )
+        for neuron in random.sample(mutable_neurons, neurons):
+            neuron.mutate_bias()
 
     def __repr__(self) -> str:
         return "Layer({})".format(self.size)

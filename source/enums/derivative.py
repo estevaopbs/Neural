@@ -1,9 +1,9 @@
 from enum import Enum
 
-from ..entities.Neuron import Neuron
+from ..entities.neuron import Neuron
 
 
-class NeuronDerivative(Enum):
+class ActivationDerivative(Enum):
     LINEAR = Neuron.linear_derivative
     SIGMOID = Neuron.sigmoid_derivative
     BINARY = Neuron.binary_derivative

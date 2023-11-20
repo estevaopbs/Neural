@@ -7,8 +7,9 @@ from numbers import Number
 from pathlib import Path
 from typing import Callable, List, Type
 
-from .Layer import Layer
-from .Neuron import Neuron
+from .layer import Layer
+from .neuron import Neuron
+from ..cases.crossover import layer_crossover, neuron_crossover
 
 
 class Network:
@@ -52,9 +53,9 @@ class Network:
         cls,
         sizes: List[int],
         activation: Callable[[Number], Number],
-        rand_weights_generator: Callable[[], Number],
+        rand_weight: Callable[[], Number],
         second_step: Callable[[Number], Number] | None = None,
-        rand_bias_generator: Callable[[], Number] | None = None,
+        rand_bias: Callable[[], Number] | None = None,
         derivative: Callable[[Number], Number] | None = None,
         LayerClass: Type[Layer] = Layer,
         NeuronClass: Type[Neuron] = Neuron,
@@ -63,11 +64,11 @@ class Network:
             [
                 LayerClass.from_random(
                     size,
-                    weights,
                     activation,
-                    rand_weights_generator,
+                    weights,
+                    rand_weight,
                     second_step,
-                    rand_bias_generator,
+                    rand_bias,
                     derivative,
                     NeuronClass,
                 )
@@ -75,36 +76,46 @@ class Network:
             ]
         )
 
-    def evaluate(self, inputs: List[Number]) -> List[Number]:
+    def feed_forward(self, inputs: List[Number]) -> List[Number]:
         for layer in self.layers:
             inputs = layer.evaluate(inputs)
         return inputs
 
-    def enforce_weights(self):
-        for layer, weights in zip(
+    def attune_weights(self):
+        for layer, weight in zip(
             self.layers, [1] + [layer.size for layer in self.layers[:-1]]
         ):
-            layer.enforce_weights(weights)
+            layer._enforce_weights(weight)
 
-    def mutate_weight(self):
-        random.choice(self.layers).mutate_weight()
+    def mutate_weights(self, neurons, weights: int = 1):
+        mutable_layers_indexes = []
+        for n, layer in enumerate(self.layers):
+            mutable_neurons = len(layer.weight_mutable_neurons)
+            if mutable_neurons:
+                mutable_layers_indexes += [n] * mutable_neurons
+        if len(mutable_layers_indexes) < neurons:
+            raise ValueError(
+                "Invalid number of neurons to mutate. Must be less than or equal to the number of mutable neurons."
+            )
+        layers_to_mutate = random.sample(mutable_layers_indexes, neurons)
+        for layer_index in set(layers_to_mutate):
+            self.layers[layer_index].mutate_weights(
+                layers_to_mutate.count(layer_index), weights
+            )
 
-    def mutate_bias(self):
-        random.choice(self.layers).mutate_bias()
-
-    def mutate_layer_weights(self):
-        random.choice(self.layers).mutate_weights()
-
-    def mutate_layer_biases(self):
-        random.choice(self.layers).mutate_biases()
-
-    def mutate_weights(self):
-        for layer in self.layers:
-            layer.mutate_weights()
-
-    def mutate_biases(self):
-        for layer in self.layers:
-            layer.mutate_biases()
+    def mutate_biases(self, neurons: int = 1):
+        mutable_layers_indexes = []
+        for n, layer in enumerate(self.layers):
+            mutable_neurons = len(layer.bias_mutable_neurons)
+            if mutable_neurons:
+                mutable_layers_indexes += [n] * mutable_neurons
+        if len(mutable_layers_indexes) < neurons:
+            raise ValueError(
+                "Invalid number of neurons to mutate. Must be less than or equal to the number of mutable neurons."
+            )
+        layers_to_mutate = random.sample(mutable_layers_indexes, neurons)
+        for layer_index in set(layers_to_mutate):
+            self.layers[layer_index].mutate_biases(layers_to_mutate.count(layer_index))
 
     def to_json(self, filename: Path):
         with open(filename, "w") as f:
@@ -127,6 +138,12 @@ class Network:
     @property
     def size(self):
         return len(self.layers)
+
+    def layer_crossover(self, donor: Network, layers: int = 1) -> Network:
+        return layer_crossover(self, donor, layers)
+
+    def neuron_crossover(self, donor: Network, neurons: int = 1) -> Network:
+        return neuron_crossover(self, donor, neurons)
 
     def __repr__(self) -> str:
         return "Network({})".format(self.size)

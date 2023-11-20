@@ -1,9 +1,9 @@
 from enum import Enum
 
-from ..entities.Neuron import Neuron
+from ..entities.neuron import Neuron
 
 
-class NeuronRandomGenerator(Enum):
+class RandomGenerator(Enum):
     RANDOMF = Neuron.random_f
     RANDOMI8 = Neuron.random_i8
     RANDOMI16 = Neuron.random_i16

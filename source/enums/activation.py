@@ -1,9 +1,9 @@
 from enum import Enum
 
-from ..entities.Neuron import Neuron
+from ..entities.neuron import Neuron
 
 
-class NeuronFunction(Enum):
+class ActivationFunction(Enum):
     LINEAR = Neuron.linear
     SIGMOID = Neuron.sigmoid
     BINARY = Neuron.binary

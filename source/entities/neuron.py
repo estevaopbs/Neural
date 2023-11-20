@@ -5,9 +5,9 @@ from math import e
 from numbers import Number
 from typing import Callable, List
 
-from ..enums.NeuronDerivative import NeuronDerivative
-from ..enums.NeuronFunction import NeuronFunction
-from ..enums.NeuronRandomGenerator import NeuronRandomGenerator
+from ..enums.derivative import ActivationDerivative
+from ..enums.activation import ActivationFunction
+from ..enums.random import RandomGenerator
 
 
 class Neuron:
@@ -16,8 +16,8 @@ class Neuron:
         "_weights",
         "_bias",
         "_second_step",
-        "_rand_weights_generator",
-        "_rand_bias_generator",
+        "_rand_weight",
+        "_rand_bias",
         "_derivative",
         "_evaluate",
     )
@@ -28,16 +28,16 @@ class Neuron:
         weights: List[Number] = [],
         bias: Number | None = None,
         second_step: Callable[[Number], Number] | None = None,
-        rand_weights_generator: Callable[[], Number] | None = None,
-        rand_bias_generator: Callable[[], Number] | None = None,
+        rand_weight: Callable[[], Number] | None = None,
+        rand_bias: Callable[[], Number] | None = None,
         derivative: Callable[[Number], Number] | None = None,
     ):
         self.activation = activation
         self.weights = weights
         self.bias = bias
         self.second_step = second_step
-        self.rand_weights_generator = rand_weights_generator
-        self.rand_bias_generator = rand_bias_generator
+        self.rand_weight = rand_weight
+        self.rand_bias = rand_bias
         self.derivative = derivative
         self._get_evaluate()
 
@@ -55,6 +55,7 @@ class Neuron:
                     type(activation)
                 )
             )
+        self.derivative = None
 
     @property
     def weights(self) -> List[Number]:
@@ -105,40 +106,39 @@ class Neuron:
                 )
             )
         self._get_evaluate()
+        self.derivative = None
 
     @property
-    def rand_weights_generator(self):
-        return self._rand_weights_generator
+    def rand_weight(self):
+        return self._rand_weight
 
-    @rand_weights_generator.setter
-    def rand_weights_generator(
-        self, rand_weights_generator: Callable[[], Number] | None
-    ):
-        if rand_weights_generator is None:
-            self._rand_weights_generator = None
-        elif callable(rand_weights_generator):
-            self._rand_weights_generator = rand_weights_generator
+    @rand_weight.setter
+    def rand_weight(self, rand_weight: Callable[[], Number] | None):
+        if rand_weight is None:
+            self._rand_weight = None
+        elif callable(rand_weight):
+            self._rand_weight = rand_weight
         else:
             raise TypeError(
-                "rand_weights_generator must be a None or function that receives no arguments and returns a number, not {}".format(
-                    type(rand_weights_generator)
+                "rand_weight must be a None or function that receives no arguments and returns a number, not {}".format(
+                    type(rand_weight)
                 )
             )
 
     @property
-    def rand_bias_generator(self):
-        return self._rand_bias_generator
+    def rand_bias(self):
+        return self._rand_bias
 
-    @rand_bias_generator.setter
-    def rand_bias_generator(self, rand_bias_generator: Callable[[], Number] | None):
-        if rand_bias_generator is None:
-            self._rand_bias_generator = None
-        elif callable(rand_bias_generator):
-            self._rand_bias_generator = rand_bias_generator
+    @rand_bias.setter
+    def rand_bias(self, rand_bias: Callable[[], Number] | None):
+        if rand_bias is None:
+            self._rand_bias = None
+        elif callable(rand_bias):
+            self._rand_bias = rand_bias
         else:
             raise TypeError(
-                "rand_bias_generator must be None or a function that receives no arguments and returns a number, not {}".format(
-                    type(rand_bias_generator)
+                "rand_bias must be None or a function that receives no arguments and returns a number, not {}".format(
+                    type(rand_bias)
                 )
             )
 
@@ -151,9 +151,9 @@ class Neuron:
         to_derivate = self.second_step if self.second_step else self.activation
         if derivative is None:
             self._derivative = None
-            for f in NeuronDerivative.__members__:
+            for f in ActivationDerivative.__members__:
                 if f == to_derivate:
-                    self._derivative = NeuronDerivative[f]
+                    self._derivative = ActivationDerivative[f]
                     break
         elif callable(derivative):
             self._derivative = derivative
@@ -212,42 +212,48 @@ class Neuron:
                     "Neuron activation and second_step functions must receive one number and return one number",
                 )
 
-    def mutate_weights(self):
-        if not self.rand_weights_generator:
-            raise ValueError(
-                "rand_weights_generator must be a function that receives no arguments and returns a number, not None"
+    def mutate_weights(self, weights: int = 1):
+        if not isinstance(weights, int):
+            raise TypeError(
+                "weights must be an integer, not {}".format(type(weights).__name__)
             )
-        self.weights[
-            random.choice(range(len(self.weights)))
-        ] = self.rand_weights_generator()
+        if weights < 1:
+            raise ValueError("weights must be greater than 0")
+        if not self.rand_weight:
+            raise ValueError(
+                "rand_weight must be a function that receives no arguments and returns a number, not None"
+            )
+        weights = min(weights, len(self.weights))
+        for n in random.sample(range(len(self.weights)), weights):
+            self.weights[n] = self.rand_weight()
 
     def mutate_bias(self):
-        if not self.rand_bias_generator:
+        if not self.rand_bias:
             raise ValueError(
-                "rand_bias_generator must be a function that receives no arguments and returns a number, not None"
+                "rand_bias must be a function that receives no arguments and returns a number, not None"
             )
-        self.bias = self.rand_bias_generator()
+        self.bias = self.rand_bias()
 
     def mutate_weights_and_bias(self):
-        if not self.rand_weights_generator:
+        if not self.rand_weight:
             raise ValueError(
-                "rand_weights_generator must be a function that receives no arguments and returns a number, not None"
+                "rand_weight must be a function that receives no arguments and returns a number, not None"
             )
-        if not self.rand_bias_generator:
+        if not self.rand_bias:
             raise ValueError(
-                "rand_bias_generator must be a function that receives no arguments and returns a number, not None"
+                "rand_bias must be a function that receives no arguments and returns a number, not None"
             )
         self.mutate_weights()
         self.mutate_bias()
 
     def mutate_weights_or_bias(self):
-        if not self.rand_weights_generator:
+        if not self.rand_weight:
             raise ValueError(
-                "rand_weights_generator must be a function that receives no arguments and returns a number, not None"
+                "rand_weight must be a function that receives no arguments and returns a number, not None"
             )
-        if not self.rand_bias_generator:
+        if not self.rand_bias:
             raise ValueError(
-                "rand_bias_generator must be a function that receives no arguments and returns a number, not None"
+                "rand_bias must be a function that receives no arguments and returns a number, not None"
             )
         if random.choice([True, False]):
             self.mutate_weights()
@@ -261,12 +267,8 @@ class Neuron:
             "weights": self.weights,
             "bias": self.bias,
             "second_step": self.second_step.__name__,
-            "rand_weights_generator": self.rand_weights_generator.__name__
-            if self.rand_weights_generator
-            else None,
-            "rand_bias_generator": self.rand_bias_generator.__name__
-            if self.rand_bias_generator
-            else None,
+            "rand_weight": self.rand_weight.__name__ if self.rand_weight else None,
+            "rand_bias": self.rand_bias.__name__ if self.rand_bias else None,
             "derivative": self.derivative.__name__ if self.derivative else None,
         }
 
@@ -275,18 +277,18 @@ class Neuron:
         cls,
         weights: int,
         activation: Callable[[Number], Number],
-        rand_weights_generator: Callable[[], Number],
+        rand_weight: Callable[[], Number],
         second_step: Callable[[Number], Number] | None = None,
-        rand_bias_generator: Callable[[], Number] | None = None,
+        rand_bias: Callable[[], Number] | None = None,
         derivative: Callable[[Number], Number] | None = None,
     ) -> Neuron:
         return cls(
             activation,
-            [rand_weights_generator() for _ in range(weights)],
-            rand_bias_generator() if rand_bias_generator else None,
+            [rand_weight() for _ in range(weights)],
+            rand_bias() if rand_bias else None,
             second_step,
-            rand_weights_generator,
-            rand_bias_generator,
+            rand_weight,
+            rand_bias,
             derivative,
         )
 
@@ -298,7 +300,10 @@ class Neuron:
             raise ValueError(
                 "the function must be one of the following: {}, not {}".format(
                     ", ".join(
-                        [cls.__name__ + "." + f.value.__name__ for f in NeuronFunction]
+                        [
+                            cls.__name__ + "." + f.value.__name__
+                            for f in ActivationFunction
+                        ]
                     ),
                     function,
                 ),
@@ -313,12 +318,9 @@ class Neuron:
             return getattr(cls, function)
         else:
             raise ValueError(
-                "rand_weights_generator must be one of the following: {}, not {}".format(
+                "rand_weight must be one of the following: {}, not {}".format(
                     ", ".join(
-                        [
-                            cls.__name__ + "." + f.value.__name__
-                            for f in NeuronRandomGenerator
-                        ]
+                        [cls.__name__ + "." + f.value.__name__ for f in RandomGenerator]
                     ),
                     function,
                 ),
@@ -335,7 +337,7 @@ class Neuron:
                     ", ".join(
                         [
                             cls.__name__ + "." + f.value.__name__
-                            for f in NeuronDerivative
+                            for f in ActivationDerivative
                         ]
                     ),
                     derivative,
@@ -345,36 +347,33 @@ class Neuron:
 
     @classmethod
     def from_data(cls, data: dict) -> Neuron:
-        activation = cls._step_function_from_data(data["activation"])
+        activation = cls._function_from_data(data["activation"])
         weights = data["weights"]
         bias = data["bias"]
-        second_step = cls._step_function_from_data(data["second_step"])
-        rand_weights_generator = cls._rand_generator_from_data(
-            data["rand_weights_generator"]
-        )
-        rand_bias_generator = cls._rand_generator_from_data(data["rand_bias_generator"])
+        second_step = cls._function_from_data(data["second_step"])
+        rand_weight = cls._rand_generator_from_data(data["rand_weight"])
+        rand_bias = cls._rand_generator_from_data(data["rand_bias"])
         derivative = cls._derivative_from_data(data["derivative"])
         return cls(
             activation,
             weights,
             bias,
             second_step,
-            rand_weights_generator,
-            rand_bias_generator,
+            rand_weight,
+            rand_bias,
             derivative,
         )
 
-    def enforce_weights(self, weights: int):
+    def _attune_weights(self, weights: int):
         if len(self.weights) > weights:
             self.weights = self.weights[:weights]
         elif len(self.weights) < weights:
-            if not self.rand_weights_generator:
+            if not self.rand_weight:
                 raise ValueError(
-                    "rand_weights_generator must be a function that receives no arguments and returns a number, not None"
+                    "rand_weight must be a function that receives no arguments and returns a number, not None"
                 )
             self.weights += [
-                self.rand_weights_generator()
-                for _ in range(weights - len(self.weights))
+                self.rand_weight() for _ in range(weights - len(self.weights))
             ]
 
     @staticmethod
@@ -465,6 +464,6 @@ class Neuron:
             and self.weights == __value.weights
             and self.bias == __value.bias
             and self.second_step == __value.second_step
-            and self.rand_weights_generator == __value.rand_weights_generator
-            and self.rand_bias_generator == __value.rand_bias_generator
+            and self.rand_weight == __value.rand_weight
+            and self.rand_bias == __value.rand_bias
         )

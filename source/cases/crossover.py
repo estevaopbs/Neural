@@ -1,7 +1,7 @@
 import random
 from copy import deepcopy
 
-from ..entities.Network import Network
+from ..entities.network import Network
 
 
 def layer_crossover(parent: Network, donor: Network, layers: int = 1) -> Network:
@@ -15,13 +15,13 @@ def layer_crossover(parent: Network, donor: Network, layers: int = 1) -> Network
             "Invalid number of layers to crossover. Must be between 1 and half the number of layers - 1."
         )
     donor_layer_indexes = random.sample(range(len(parent.layers)), layers)
-    layers = deepcopy(parent.layers)
+    child_layers = deepcopy(parent.layers)
     for donor_layer_index in donor_layer_indexes:
-        layers[donor_layer_index] = deepcopy(donor.layers[donor_layer_index])
-    return parent.__class__(layers)
+        child_layers[donor_layer_index] = deepcopy(donor.layers[donor_layer_index])
+    return parent.__class__(child_layers)
 
 
-def neuron_crossover(parent: Network, donor: Network, neurons: int) -> Network:
+def neuron_crossover(parent: Network, donor: Network, neurons: int = 1) -> Network:
     if len(parent.layers) != len(donor.layers):
         raise ValueError("Networks are incompatible. Layer counts do not match.")
     neurons_count = 0
@@ -30,9 +30,9 @@ def neuron_crossover(parent: Network, donor: Network, neurons: int) -> Network:
     for parent_layer, donor_layer in zip(parent.layers, donor.layers):
         if parent_layer.size != donor_layer.size:
             raise ValueError("Networks are incompatible. Layer sizes do not match.")
-        neurons_indexes = [(layers_count, n) for n in range(parent_layer.size)]
-        neurons_count += parent_layer.size
+        neurons_indexes += [(layers_count, n) for n in range(parent_layer.size)]
         layers_count += 1
+        neurons_count += parent_layer.size
     if neurons > neurons_count / 2 - 1 or neurons < 1:
         raise ValueError(
             "Invalid number of neurons to crossover. Must be between 1 and half the number of neurons - 1."
