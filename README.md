@@ -47,7 +47,7 @@ git clone https://github.com/estevaopbs/Neural.git
 The Network class represents a neural network. It consists of layers, and each layer contains neurons.
 
 #### Attributes
-- layers: List of Layer objects.
+- `layers`: List of Layer objects.
 
 #### Methods
 - `evaluate(inputs: List[Number]) -> List[Number]`: Evaluates the network with the given inputs.
