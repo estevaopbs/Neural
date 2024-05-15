@@ -124,4 +124,4 @@ Performs crossover at the neuron level between a parent and a donor network.
 Contributions are welcome! Feel free to open issues or pull requests.
 
 ## Licensing
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE).
